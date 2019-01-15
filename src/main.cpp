@@ -17,6 +17,13 @@ int world2screen(float x) {
   return (x+1)*size/2;
 }
 
+/*!
+ * Main du programma
+ * @param argc
+ * @param argv
+ * @return
+ */
+
 int main(int argc, char **argv){
   if (argc < 2){
     cerr << "./projet3D filename.obj" << endl;
