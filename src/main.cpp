@@ -8,7 +8,7 @@
 
 
 using namespace std;
-const int size = 500;
+const int size = 800;
 
 
 const TGAColor white = TGAColor(255, 255, 255, 255);
@@ -42,7 +42,7 @@ void drawFace(char* filename){
   vector<int> line = lecture.readline(filename);
   Outils outils;
   TGAImage image(size, size, TGAImage::RGB);
-  point3Df light = {0, 0, 0.8};
+  point3Df light = {0, 0, 1};
   for (int i = 0; i < line.size(); i+=3){
     int Ax = world2screen(tab[0][line[i]]);
     int Ay = world2screen(tab[1][line[i]]);
@@ -60,8 +60,14 @@ void drawFace(char* filename){
     crossV.x /= norm;
     crossV.y /= norm;
     crossV.z /= norm;
+    float prod = (crossV.x * crossV.x + crossV.y * crossV.y + crossV.z * crossV.z) * (light.x*light.x + light.y*light.y+light.z*light.z);
+    float cos = (crossV.x * light.x + crossV.y * light.y + crossV.z * light.z) / sqrt(prod);
+
+    /*
+     * (x1*x2 + y1y2+z1z2) / sqrt( (x1² + y1² + z1²) * (x2² + y2² + z2²) )
+     */
     //Produit scalaire entre norme triangle et vecteur de la lumière
-    float lightning = light.x * crossV.x + light.y * crossV.y + light.z * crossV.z;
+    float lightning = norm * sqrtf(1) * cos;
     if (lightning >0)
       outils.drawTriangle(Ax, Ay, Bx, By, Cx, Cy, image, TGAColor(lightning*255, lightning*255, lightning*255, 255));
   }
@@ -69,19 +75,24 @@ void drawFace(char* filename){
   image.write_tga_file("output.tga");
 }
 
+void rasterize(point2D p0, point2D p1, TGAImage &image, TGAColor color, int ybuffer[]){
+  if (p0.x >p1.x)
+    swap(p0, p1);
+}
+
 int main(int argc, char **argv){
   if (argc < 2){
     cerr << "./projet3D filename.obj" << endl;
     return -1;
   }
-  //drawFace(argv[1]);
-  int width = size;
+  drawFace(argv[1]);
+ /* int width = size;
   TGAImage render(width, 16, TGAImage::RGB);
   int ybuffer[width];
   for (int i = 0; i<width;i++) {
     ybuffer[i] = numeric_limits<int>::min();
     render.set(i, 0, yellow);
-  }
+  }*/
   //render.flip_vertically();
-  render.write_tga_file("render.tga");
+  //render.write_tga_file("render.tga");
 }
