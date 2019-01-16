@@ -5,7 +5,7 @@
 #include "tgaimage.h"
 #include "outils.hpp"
 #include "lecture.hpp"
-
+#include "vec3Df.hpp"
 
 using namespace std;
 const int size = 800;
@@ -28,51 +28,48 @@ int world2screen(float x) {
   return (x+1)*size/2;
 }
 
-point3Df crossProduct(point3Df v1, point3Df v2){
-  point3Df crossV;
-  crossV.x = v1.y * v2.z - v1.y * v2.z;
-  crossV.y = v1.z * v2.x - v1.x * v2.z;
-  crossV.z = v1.x * v2.y - v1.y * v2.x;
-  return crossV;
+vec3Df crossProduct(point3Df v1, point3Df v2){
+  float x = v1.y * v2.z - v1.y * v2.z;
+  float y = v1.z * v2.x - v1.x * v2.z;
+  float z = v1.x * v2.y - v1.y * v2.x;
+  return vec3Df(x, y, z);
 }
 
 void drawFace(char* filename){
-  Lecture lecture;
-  vector<vector<float> > tab = lecture.readfile(filename);
-  vector<int> line = lecture.readline(filename);
-  Outils outils;
-  TGAImage image(size, size, TGAImage::RGB);
-  point3Df light = {0, 0, 1};
-  for (int i = 0; i < line.size(); i+=3){
-    int Ax = world2screen(tab[0][line[i]]);
-    int Ay = world2screen(tab[1][line[i]]);
-    int Bx = world2screen(tab[0][line[i+1]]);
-    int By = world2screen(tab[1][line[i+1]]);
-    int Cx = world2screen(tab[0][line[i+2]]);
-    int Cy = world2screen(tab[1][line[i+2]]);
-    //Bx - Ax; By - Ay; Bz - Az;
-    point3Df v1 = {tab[0][line[i+1]] - tab[0][line[i]], tab[1][line[i+1]] - tab[1][line[i]], tab[2][line[i+1]] - tab[2][line[i]]};
-    //Cx - Ax; Cy - Cy; Cz - Az;
-    point3Df v2 = {tab[0][line[i+2]] - tab[0][line[i]], tab[1][line[i+2]] - tab[1][line[i]], tab[2][line[i+2]] - tab[2][line[i]]};
-    //Produit vectorielle du triangle
-    point3Df crossV = crossProduct(v1, v2);
-    float norm = sqrtf(crossV.x*crossV.x + crossV.y*crossV.y + crossV.z*crossV.z);
-    crossV.x /= norm;
-    crossV.y /= norm;
-    crossV.z /= norm;
-    float prod = (crossV.x * crossV.x + crossV.y * crossV.y + crossV.z * crossV.z) * (light.x*light.x + light.y*light.y+light.z*light.z);
-    float cos = (crossV.x * light.x + crossV.y * light.y + crossV.z * light.z) / sqrt(prod);
+    Lecture lecture;
+    vector<vector<float> > tab = lecture.readfile(filename);
+    vector<int> line = lecture.readline(filename);
+    Outils outils;
+    TGAImage image(size, size, TGAImage::RGB);
+    vec3Df light = vec3Df(0, 0, 1);
+    for (int i = 0; i < line.size(); i+=3){
+        int Ax = world2screen(tab[0][line[i]]);
+        int Ay = world2screen(tab[1][line[i]]);
+        int Bx = world2screen(tab[0][line[i+1]]);
+        int By = world2screen(tab[1][line[i+1]]);
+        int Cx = world2screen(tab[0][line[i+2]]);
+        int Cy = world2screen(tab[1][line[i+2]]);
+        //Bx - Ax; By - Ay; Bz - Az;
+        point3Df v1 = {tab[0][line[i+1]] - tab[0][line[i]], tab[1][line[i+1]] - tab[1][line[i]], tab[2][line[i+1]] - tab[2][line[i]]};
+        //Cx - Ax; Cy - Cy; Cz - Az;
+        point3Df v2 = {tab[0][line[i+2]] - tab[0][line[i]], tab[1][line[i+2]] - tab[1][line[i]], tab[2][line[i+2]] - tab[2][line[i]]};
 
-    /*
-     * (x1*x2 + y1y2+z1z2) / sqrt( (x1² + y1² + z1²) * (x2² + y2² + z2²) )
-     */
-    //Produit scalaire entre norme triangle et vecteur de la lumière
-    float lightning = norm * sqrtf(1) * cos;
-    if (lightning >0)
-      outils.drawTriangle(Ax, Ay, Bx, By, Cx, Cy, image, TGAColor(lightning*255, lightning*255, lightning*255, 255));
-  }
-  image.flip_vertically();
-  image.write_tga_file("output.tga");
+        //Produit vectorielle du triangle
+        vec3Df crossV = crossProduct(v1, v2);
+        crossV.normalize();
+        light.normalize();
+
+        //cosinus
+        float cos = (crossV.x * light.x + crossV.y * light.y + crossV.z * light.z) / (crossV.norm * light.norm);
+
+        //Produit scalaire entre norme triangle et vecteur de la lumière
+        float lighting = crossV.norm * light.norm * cos;
+
+        if (lighting >0)
+            outils.drawTriangle(Ax, Ay, Bx, By, Cx, Cy, image, TGAColor(lighting*255, lighting*255, lighting*255, 255));
+    }
+    image.flip_vertically();
+    image.write_tga_file("output.tga");
 }
 
 void rasterize(point2D p0, point2D p1, TGAImage &image, TGAColor color, int ybuffer[]){
