@@ -14,6 +14,7 @@ std::vector<std::vector<float> > Lecture::readfile(char *filename) {
     vector<vector<float> > tab;
     vector<float> x;
     vector<float> y;
+    vector<float> z;
 
     vector<string> line_parts;
     string part;
@@ -27,12 +28,14 @@ std::vector<std::vector<float> > Lecture::readfile(char *filename) {
                 }
                 x.push_back(strtof((line_parts[1]).c_str(), 0));
                 y.push_back(strtof((line_parts[2]).c_str(), 0));
+                z.push_back(strtof((line_parts[3]).c_str(), 0));
             }
             line_parts.clear();
         }
         fichier.close();
         tab.push_back(x);
         tab.push_back(y);
+        tab.push_back(z);
     } else {
         cerr << "Ouverture du fichier " << filename << "impossible !" << endl;
     }
