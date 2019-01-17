@@ -78,7 +78,66 @@ void Outils::fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, TGAIma
     }
 }
 
-void Outils::drawTriangle(int x1, int y1, int x2, int y2, int x3, int y3, TGAImage &image, TGAColor color) {
+point2D* Outils::boundingBox(point2D *triangle) {
+    int maxX;
+    int maxY;
+    int minX;
+    int minY;
+    int width;
+    int height;
+
+    if (triangle[0].x > triangle[1].x)
+        maxX = triangle[0].x;
+    else
+        maxX = triangle[1].x;
+    if (triangle[0].x > triangle[2].x)
+        maxX = triangle[0].x;
+    else
+        maxX = triangle[2].x;
+    if (triangle[1].x > triangle[2].x)
+        maxX = triangle[1].x;
+    else
+        maxX = triangle[2].x;
+    if (triangle[0].y > triangle[1].y)
+        maxY = triangle[0].y;
+    else
+        maxY = triangle[1].y;
+    if (triangle[0].y > triangle[2].y)
+        maxY = triangle[0].y;
+    else
+        maxY = triangle[2].y;
+    if (triangle[1].y > triangle[2].y)
+        maxY = triangle[1].y;
+    else
+        maxY = triangle[2].y;
+
+    if (triangle[0].x > triangle[1].x)
+        minX = triangle[1].x;
+    else
+        minX = triangle[0].x;
+    if (triangle[0].x > triangle[2].x)
+        minX = triangle[2].x;
+    else
+        minX = triangle[0].x;
+    if (triangle[1].x > triangle[2].x)
+        minX = triangle[2].x;
+    else
+        minX = triangle[1].x;
+    if (triangle[0].y > triangle[1].y)
+        minY = triangle[1].y;
+    else
+        minY = triangle[0].y;
+    if (triangle[0].y > triangle[2].y)
+        minY = triangle[2].y;
+    else
+        minY = triangle[0].y;
+    if (triangle[1].y > triangle[2].y)
+        minY = triangle[2].y;
+    else
+        minY = triangle[1].y;
+}
+
+void Outils::drawTriangle(point2D A, point2D B, point2D C, TGAImage &image, TGAColor color, int zbuffer[][]) {
     if (y1>y2) {
         std::swap(x1, x2);
         std::swap(y1, y2);

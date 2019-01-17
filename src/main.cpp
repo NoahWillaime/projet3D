@@ -29,7 +29,7 @@ int world2screen(float x) {
 }
 
 vec3Df crossProduct(point3Df v1, point3Df v2){
-  float x = v1.y * v2.z - v1.y * v2.z;
+  float x = v1.y * v2.z - v1.z * v2.y;
   float y = v1.z * v2.x - v1.x * v2.z;
   float z = v1.x * v2.y - v1.y * v2.x;
   return vec3Df(x, y, z);
@@ -42,13 +42,16 @@ void drawFace(char* filename){
     Outils outils;
     TGAImage image(size, size, TGAImage::RGB);
     vec3Df light = vec3Df(0, 0, 1);
+    int zbuffer[size][size];
+    for (int i = 0; i < size; i++){
+        for (int j = 0; j < size; j++){
+            zbuffer[i][j] = numeric_limits<int>::min();
+        }
+    }
     for (int i = 0; i < line.size(); i+=3){
-        int Ax = world2screen(tab[0][line[i]]);
-        int Ay = world2screen(tab[1][line[i]]);
-        int Bx = world2screen(tab[0][line[i+1]]);
-        int By = world2screen(tab[1][line[i+1]]);
-        int Cx = world2screen(tab[0][line[i+2]]);
-        int Cy = world2screen(tab[1][line[i+2]]);
+        point2D A = {world2screen(tab[0][line[i]]), world2screen(tab[1][line[i]])};
+        point2D B = {world2screen(tab[0][line[i+1]]), world2screen(tab[1][line[i+1]])};
+        point2D C = {world2screen(tab[0][line[i+2]]), world2screen(tab[1][line[i+2]])};
         //Bx - Ax; By - Ay; Bz - Az;
         point3Df v1 = {tab[0][line[i+1]] - tab[0][line[i]], tab[1][line[i+1]] - tab[1][line[i]], tab[2][line[i+1]] - tab[2][line[i]]};
         //Cx - Ax; Cy - Cy; Cz - Az;
@@ -56,17 +59,16 @@ void drawFace(char* filename){
 
         //Produit vectorielle du triangle
         vec3Df crossV = crossProduct(v1, v2);
+
         crossV.normalize();
         light.normalize();
 
         //cosinus
         float cos = (crossV.x * light.x + crossV.y * light.y + crossV.z * light.z) / (crossV.norm * light.norm);
-
         //Produit scalaire entre norme triangle et vecteur de la lumière
         float lighting = crossV.norm * light.norm * cos;
-
         if (lighting >0)
-            outils.drawTriangle(Ax, Ay, Bx, By, Cx, Cy, image, TGAColor(lighting*255, lighting*255, lighting*255, 255));
+            outils.drawTriangle(A, B, C, image, TGAColor(lighting*255, lighting*255, lighting*255, 255));
     }
     image.flip_vertically();
     image.write_tga_file("output.tga");
