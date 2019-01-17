@@ -49,9 +49,9 @@ void drawFace(char* filename){
         }
     }
     for (int i = 0; i < line.size(); i+=3){
-        point3Df A = {world2screen(tab[0][line[i]]), world2screen(tab[1][line[i]]), world2screen(tab[2][line[i]])};
-        point3Df B = {world2screen(tab[0][line[i+1]]), world2screen(tab[1][line[i+1]]),  world2screen(tab[2][line[i+1]])};
-        point3Df C = {world2screen(tab[0][line[i+2]]), world2screen(tab[1][line[i+2]]),  world2screen(tab[2][line[i+2]])};
+        point3D A = {world2screen(tab[0][line[i]]), world2screen(tab[1][line[i]]), world2screen(tab[2][line[i]])};
+        point3D B = {world2screen(tab[0][line[i+1]]), world2screen(tab[1][line[i+1]]),  world2screen(tab[2][line[i+1]])};
+        point3D C = {world2screen(tab[0][line[i+2]]), world2screen(tab[1][line[i+2]]),  world2screen(tab[2][line[i+2]])};
         //Bx - Ax; By - Ay; Bz - Az;
         point3Df v1 = {tab[0][line[i+1]] - tab[0][line[i]], tab[1][line[i+1]] - tab[1][line[i]], tab[2][line[i+1]] - tab[2][line[i]]};
         //Cx - Ax; Cy - Cy; Cz - Az;
@@ -68,7 +68,7 @@ void drawFace(char* filename){
         //Produit scalaire entre norme triangle et vecteur de la lumière
         float lighting = crossV.norm * light.norm * cos;
         if (lighting >0)
-            outils.drawTriangle(A, B, C, image, TGAColor(lighting*255, lighting*255, lighting*255, 255), zbuffer);
+            outils.drawTriangle(A, B, C, image, TGAColor(lighting*255, lighting*0, lighting*255, 255), zbuffer);
     }
     image.flip_vertically();
     image.write_tga_file("output.tga");

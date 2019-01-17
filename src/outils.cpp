@@ -49,35 +49,6 @@ vector<vector<int> > Outils::drawLine(int x0, int y0, int x1, int y1, TGAImage &
     return tab;
 }
 
-vector<vector<int> > Outils::lineTriangle(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color) {
-    vector<int> Vx;
-    vector<int> Vy;
-    vector<vector<int> > tab;
-    if (y0>y1) {
-        std::swap(x0, x1);
-        std::swap(y0, y1);
-    }
-    for (int y=y0; y<=y1; y++) {
-        float t = (y-y0)/float(y1-y0);
-        int x = x0*(1-t) + x1*t;
-        image.set(x, y, color);
-        Vx.push_back(x);
-        Vy.push_back(y);
-    }
-    tab.push_back(Vx);
-    tab.push_back(Vy);
-    return tab;
-}
-
-void Outils::fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, TGAImage &image, TGAColor color) {
-    vector<vector<int> > line1 = lineTriangle(x1, y1, x2, y2, image, color);
-    vector<vector<int> > line2 = lineTriangle(x3, y3, x2, y2, image, color);
-
-    for (int i = 0; i < line1[0].size(); i++) {
-        drawLine(line1[0][i], line1[1][i], line2[0][i], line2[1][i], image, color);
-    }
-}
-
 int Outils::getMin(int *param) {
     int min = numeric_limits<int>::max();
     for (int i = 0; i < 3; i++){
@@ -96,9 +67,9 @@ int Outils::getMax(int *param) {
     return max;
 }
 
-vector<point2D> Outils::boundingBox(point3Df A, point3Df B, point3Df C) {
-    int pointX[] = {int(A.x), int(B.x), int(C.x)};
-    int pointY[] = {int(A.y), int(B.y), int(C.y)};
+vector<point2D> Outils::boundingBox(point3D A, point3D B, point3D C) {
+    int pointX[] = {A.x, B.x, C.x};
+    int pointY[] = {A.y, B.y, C.y};
     vector<point2D> boundingBox;
     point2D minBox = {getMin(pointX), getMin(pointY)};
     point2D maxBox = {getMax(pointX), getMax(pointY)};
@@ -107,7 +78,7 @@ vector<point2D> Outils::boundingBox(point3Df A, point3Df B, point3Df C) {
     return boundingBox;
 }
 
-point3Df barycentric(point2D p, point3Df A, point3Df B, point3Df C){
+point3Df Outils::barycentric(point2D p, point3D A, point3D B, point3D C){
     float p1 = (p.x - B.x) * (A.y - B.y) - (A.x - B.x) * (p.y - B.y);
     float p2 = (p.x - C.x) * (B.y - C.y) - (B.x - C.x) * (p.y - C.y);
     float p3 = (p.x - A.x) * (C.y - A.y) - (C.x - A.x) * (p.y - A.y);
@@ -115,24 +86,7 @@ point3Df barycentric(point2D p, point3Df A, point3Df B, point3Df C){
     return b;
 }
 
-void Outils::drawTriangle(point3Df A, point3Df B, point3Df C, TGAImage &image, TGAColor color, int *zbuffer) {
-  /*  if (y1>y2) {
-        std::swap(x1, x2);
-        std::swap(y1, y2);
-    }
-    if (y1>y3) {
-        std::swap(x1, x3);
-        std::swap(y1, y3);
-    }
-    if (y2>y3) {
-        std::swap(x2, x3);
-        std::swap(y2, y3);
-    }
-    float t = (y2 - y1) / float(y3 - y1);
-    int x = x1*(1-t) + x3*t;
-    fillTriangle(x2, y2, x1, y1, x, y2, image, color);
-    fillTriangle(x2, y2, x3, y3, x, y2, image, color);
-    */
+void Outils::drawTriangle(point3D A, point3D B, point3D C, TGAImage &image, TGAColor color, int *zbuffer) {
     vector<point2D> bBox = boundingBox(A, B, C);
     int z = 0;
     for (int x = bBox[0].x; x < bBox[1].x; x++){
