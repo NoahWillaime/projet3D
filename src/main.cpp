@@ -42,17 +42,16 @@ void drawFace(char* filename){
     Outils outils;
     TGAImage image(size, size, TGAImage::RGB);
     vec3Df light = vec3Df(0, 0, 1);
- /*   int zbuffer[size][size];
+    int *zbuffer = new int[size * size];
     for (int i = 0; i < size; i++){
         for (int j = 0; j < size; j++){
-            zbuffer[i][j] = numeric_limits<int>::min();
+            zbuffer[i+j*size] = numeric_limits<int>::min();
         }
-    }*/
-    int **zbuffer;
+    }
     for (int i = 0; i < line.size(); i+=3){
-        point2D A = {world2screen(tab[0][line[i]]), world2screen(tab[1][line[i]])};
-        point2D B = {world2screen(tab[0][line[i+1]]), world2screen(tab[1][line[i+1]])};
-        point2D C = {world2screen(tab[0][line[i+2]]), world2screen(tab[1][line[i+2]])};
+        point3Df A = {world2screen(tab[0][line[i]]), world2screen(tab[1][line[i]]), world2screen(tab[2][line[i]])};
+        point3Df B = {world2screen(tab[0][line[i+1]]), world2screen(tab[1][line[i+1]]),  world2screen(tab[2][line[i+1]])};
+        point3Df C = {world2screen(tab[0][line[i+2]]), world2screen(tab[1][line[i+2]]),  world2screen(tab[2][line[i+2]])};
         //Bx - Ax; By - Ay; Bz - Az;
         point3Df v1 = {tab[0][line[i+1]] - tab[0][line[i]], tab[1][line[i+1]] - tab[1][line[i]], tab[2][line[i+1]] - tab[2][line[i]]};
         //Cx - Ax; Cy - Cy; Cz - Az;

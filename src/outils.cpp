@@ -96,9 +96,9 @@ int Outils::getMax(int *param) {
     return max;
 }
 
-vector<point2D> Outils::boundingBox(point2D A, point2D B, point2D C) {
-    int pointX[] = {A.x, B.x, C.x};
-    int pointY[] = {A.y, B.y, C.y};
+vector<point2D> Outils::boundingBox(point3Df A, point3Df B, point3Df C) {
+    int pointX[] = {int(A.x), int(B.x), int(C.x)};
+    int pointY[] = {int(A.y), int(B.y), int(C.y)};
     vector<point2D> boundingBox;
     point2D minBox = {getMin(pointX), getMin(pointY)};
     point2D maxBox = {getMax(pointX), getMax(pointY)};
@@ -107,7 +107,7 @@ vector<point2D> Outils::boundingBox(point2D A, point2D B, point2D C) {
     return boundingBox;
 }
 
-point3Df barycentric(point2D p, point2D A, point2D B, point2D C){
+point3Df barycentric(point2D p, point3Df A, point3Df B, point3Df C){
     float p1 = (p.x - B.x) * (A.y - B.y) - (A.x - B.x) * (p.y - B.y);
     float p2 = (p.x - C.x) * (B.y - C.y) - (B.x - C.x) * (p.y - C.y);
     float p3 = (p.x - A.x) * (C.y - A.y) - (C.x - A.x) * (p.y - A.y);
@@ -115,7 +115,7 @@ point3Df barycentric(point2D p, point2D A, point2D B, point2D C){
     return b;
 }
 
-void Outils::drawTriangle(point2D A, point2D B, point2D C, TGAImage &image, TGAColor color, int **zbuffer) {
+void Outils::drawTriangle(point3Df A, point3Df B, point3Df C, TGAImage &image, TGAColor color, int *zbuffer) {
   /*  if (y1>y2) {
         std::swap(x1, x2);
         std::swap(y1, y2);
@@ -134,14 +134,19 @@ void Outils::drawTriangle(point2D A, point2D B, point2D C, TGAImage &image, TGAC
     fillTriangle(x2, y2, x3, y3, x, y2, image, color);
     */
     vector<point2D> bBox = boundingBox(A, B, C);
-    for (int y = bBox[0].y; y < bBox[1].y; y++){
-        for (int x = bBox[0].x; x < bBox[1].x; x++){
+    int z = 0;
+    for (int x = bBox[0].x; x < bBox[1].x; x++){
+        for (int y = bBox[0].y; y < bBox[1].y; y++){
             point2D p = {x, y};
             point3Df b = barycentric(p, A, B, C);
             if (b.x < 0 || b.y < 0 || b.z < 0){
                 continue;
             } else {
-                image.set(x, y, color);
+                z = A.z;
+                if (zbuffer[x+y*800] < z) {
+                    zbuffer[x+y*800] = z;
+                    image.set(x, y, color);
+                }
             }
         }
     }
