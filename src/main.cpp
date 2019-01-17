@@ -42,12 +42,13 @@ void drawFace(char* filename){
     Outils outils;
     TGAImage image(size, size, TGAImage::RGB);
     vec3Df light = vec3Df(0, 0, 1);
-    int zbuffer[size][size];
+ /*   int zbuffer[size][size];
     for (int i = 0; i < size; i++){
         for (int j = 0; j < size; j++){
             zbuffer[i][j] = numeric_limits<int>::min();
         }
-    }
+    }*/
+    int **zbuffer;
     for (int i = 0; i < line.size(); i+=3){
         point2D A = {world2screen(tab[0][line[i]]), world2screen(tab[1][line[i]])};
         point2D B = {world2screen(tab[0][line[i+1]]), world2screen(tab[1][line[i+1]])};
@@ -68,7 +69,7 @@ void drawFace(char* filename){
         //Produit scalaire entre norme triangle et vecteur de la lumière
         float lighting = crossV.norm * light.norm * cos;
         if (lighting >0)
-            outils.drawTriangle(A, B, C, image, TGAColor(lighting*255, lighting*255, lighting*255, 255));
+            outils.drawTriangle(A, B, C, image, TGAColor(lighting*255, lighting*255, lighting*255, 255), zbuffer);
     }
     image.flip_vertically();
     image.write_tga_file("output.tga");

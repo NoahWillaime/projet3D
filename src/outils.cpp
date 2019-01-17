@@ -78,67 +78,45 @@ void Outils::fillTriangle(int x1, int y1, int x2, int y2, int x3, int y3, TGAIma
     }
 }
 
-point2D* Outils::boundingBox(point2D *triangle) {
-    int maxX;
-    int maxY;
-    int minX;
-    int minY;
-    int width;
-    int height;
-
-    if (triangle[0].x > triangle[1].x)
-        maxX = triangle[0].x;
-    else
-        maxX = triangle[1].x;
-    if (triangle[0].x > triangle[2].x)
-        maxX = triangle[0].x;
-    else
-        maxX = triangle[2].x;
-    if (triangle[1].x > triangle[2].x)
-        maxX = triangle[1].x;
-    else
-        maxX = triangle[2].x;
-    if (triangle[0].y > triangle[1].y)
-        maxY = triangle[0].y;
-    else
-        maxY = triangle[1].y;
-    if (triangle[0].y > triangle[2].y)
-        maxY = triangle[0].y;
-    else
-        maxY = triangle[2].y;
-    if (triangle[1].y > triangle[2].y)
-        maxY = triangle[1].y;
-    else
-        maxY = triangle[2].y;
-
-    if (triangle[0].x > triangle[1].x)
-        minX = triangle[1].x;
-    else
-        minX = triangle[0].x;
-    if (triangle[0].x > triangle[2].x)
-        minX = triangle[2].x;
-    else
-        minX = triangle[0].x;
-    if (triangle[1].x > triangle[2].x)
-        minX = triangle[2].x;
-    else
-        minX = triangle[1].x;
-    if (triangle[0].y > triangle[1].y)
-        minY = triangle[1].y;
-    else
-        minY = triangle[0].y;
-    if (triangle[0].y > triangle[2].y)
-        minY = triangle[2].y;
-    else
-        minY = triangle[0].y;
-    if (triangle[1].y > triangle[2].y)
-        minY = triangle[2].y;
-    else
-        minY = triangle[1].y;
+int Outils::getMin(int *param) {
+    int min = numeric_limits<int>::max();
+    for (int i = 0; i < 3; i++){
+        if (min > param[i])
+            min = param[i];
+    }
+    return min;
 }
 
-void Outils::drawTriangle(point2D A, point2D B, point2D C, TGAImage &image, TGAColor color, int zbuffer[][]) {
-    if (y1>y2) {
+int Outils::getMax(int *param) {
+    int max = numeric_limits<int>::min();
+    for (int i = 0; i < 3; i++){
+        if (max < param[i])
+            max = param[i];
+    }
+    return max;
+}
+
+vector<point2D> Outils::boundingBox(point2D A, point2D B, point2D C) {
+    int pointX[] = {A.x, B.x, C.x};
+    int pointY[] = {A.y, B.y, C.y};
+    vector<point2D> boundingBox;
+    point2D minBox = {getMin(pointX), getMin(pointY)};
+    point2D maxBox = {getMax(pointX), getMax(pointY)};
+    boundingBox.push_back(minBox);
+    boundingBox.push_back(maxBox);
+    return boundingBox;
+}
+
+point3Df barycentric(point2D p, point2D A, point2D B, point2D C){
+    float p1 = (p.x - B.x) * (A.y - B.y) - (A.x - B.x) * (p.y - B.y);
+    float p2 = (p.x - C.x) * (B.y - C.y) - (B.x - C.x) * (p.y - C.y);
+    float p3 = (p.x - A.x) * (C.y - A.y) - (C.x - A.x) * (p.y - A.y);
+    point3Df b = {p1, p2, p3};
+    return b;
+}
+
+void Outils::drawTriangle(point2D A, point2D B, point2D C, TGAImage &image, TGAColor color, int **zbuffer) {
+  /*  if (y1>y2) {
         std::swap(x1, x2);
         std::swap(y1, y2);
     }
@@ -154,4 +132,17 @@ void Outils::drawTriangle(point2D A, point2D B, point2D C, TGAImage &image, TGAC
     int x = x1*(1-t) + x3*t;
     fillTriangle(x2, y2, x1, y1, x, y2, image, color);
     fillTriangle(x2, y2, x3, y3, x, y2, image, color);
+    */
+    vector<point2D> bBox = boundingBox(A, B, C);
+    for (int y = bBox[0].y; y < bBox[1].y; y++){
+        for (int x = bBox[0].x; x < bBox[1].x; x++){
+            point2D p = {x, y};
+            point3Df b = barycentric(p, A, B, C);
+            if (b.x < 0 || b.y < 0 || b.z < 0){
+                continue;
+            } else {
+                image.set(x, y, color);
+            }
+        }
+    }
 }
