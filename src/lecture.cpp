@@ -8,6 +8,35 @@ using namespace std;
 
 Lecture::Lecture(){};
 
+std::vector<point3Df> Lecture::readTexture(char *filename) {
+    ifstream fichier(filename, ios::in);
+    string line;
+    vector<point3Df> tab;
+    vector<string> line_parts;
+    string part;
+
+    if (fichier){
+        while (getline(fichier, line)){
+            if (line[0] == 'v' && line[1] == 't' && line[2] == ' '){
+                istringstream iss(line);
+                while(getline(iss, part, ' ')){
+                    line_parts.push_back(part);
+                }
+                float x = strtof((line_parts[1]).c_str(), 0);
+                float y = strtof((line_parts[2]).c_str(), 0);
+                float z = strtof((line_parts[3]).c_str(), 0);
+                point3Df p = {x, y, z};
+                tab.push_back(p);
+            }
+            line_parts.clear();
+        }
+        fichier.close();
+    } else {
+        cerr << "Ouverture du fichier " << filename << "impossible !" << endl;
+    }
+    return tab;
+}
+
 std::vector<std::vector<float> > Lecture::readfile(char *filename) {
     ifstream fichier(filename, ios::in);
     string line;
@@ -42,14 +71,14 @@ std::vector<std::vector<float> > Lecture::readfile(char *filename) {
     return tab;
 }
 
-std::vector<int> Lecture::readline(char *filename) {
+std::vector<point2D> Lecture::readline(char *filename) {
     ifstream fichier(filename, ios::in);
     string line;
-    vector<float> x;
-    vector<float> y;
-    vector<int> line_parts;
+    vector<point2D> line_parts;
     string part;
     string parts;
+    int p1;
+    int p2;
     if (fichier){
         while (getline(fichier, line)){
             if (line[0] == 'f'){
@@ -58,7 +87,11 @@ std::vector<int> Lecture::readline(char *filename) {
                     if (part[0] != 'f'){
                         istringstream iss2(part);
                         getline(iss2, parts, '/');
-                        line_parts.push_back(-1+atoi((parts).c_str()));
+                        p1 = -1+atoi((parts).c_str());
+                        getline(iss2, parts, '/');
+                        p2 = -1+atoi((parts).c_str());
+                        point2D p = {p1, p2};
+                        line_parts.push_back(p);
                     }
                 }
             }

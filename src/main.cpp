@@ -10,7 +10,6 @@
 using namespace std;
 const int size = 800;
 
-
 const TGAColor white = TGAColor(255, 255, 255, 255);
 const TGAColor red   = TGAColor(255, 0,   0,   255);
 const TGAColor blue = TGAColor(0, 0, 255, 255);
@@ -28,6 +27,10 @@ int world2screen(float x) {
   return (x+1)*size/2;
 }
 
+int convertTexture(float x, int sizeT){
+    return (x+1)*sizeT/2;
+}
+
 vec3Df crossProduct(point3Df v1, point3Df v2){
   float x = v1.y * v2.z - v1.z * v2.y;
   float y = v1.z * v2.x - v1.x * v2.z;
@@ -38,24 +41,33 @@ vec3Df crossProduct(point3Df v1, point3Df v2){
 void drawFace(char* filename){
     Lecture lecture;
     vector<vector<float> > tab = lecture.readfile(filename);
-    vector<int> line = lecture.readline(filename);
+    vector<point2D> line = lecture.readline(filename);
+    vector<point3Df> tabTexture = lecture.readTexture(filename);
     Outils outils;
     TGAImage image(size, size, TGAImage::RGB);
     vec3Df light = vec3Df(0, 0, 1);
+    TGAImage texture;
+    texture.read_tga_file("../obj/head_diffuse.tga");
     int *zbuffer = new int[size * size];
+    int sizeT = texture.get_width();
     for (int i = 0; i < size; i++){
         for (int j = 0; j < size; j++){
             zbuffer[i+j*size] = numeric_limits<int>::min();
         }
     }
     for (int i = 0; i < line.size(); i+=3){
-        point3D A = {world2screen(tab[0][line[i]]), world2screen(tab[1][line[i]]), world2screen(tab[2][line[i]])};
-        point3D B = {world2screen(tab[0][line[i+1]]), world2screen(tab[1][line[i+1]]),  world2screen(tab[2][line[i+1]])};
-        point3D C = {world2screen(tab[0][line[i+2]]), world2screen(tab[1][line[i+2]]),  world2screen(tab[2][line[i+2]])};
+        point3D A = {world2screen(tab[0][line[i].x]), world2screen(tab[1][line[i].x]), world2screen(tab[2][line[i].x])};
+        point3D B = {world2screen(tab[0][line[i+1].x]), world2screen(tab[1][line[i+1].x]),  world2screen(tab[2][line[i+1].x])};
+        point3D C = {world2screen(tab[0][line[i+2].x]), world2screen(tab[1][line[i+2].x]),  world2screen(tab[2][line[i+2].x])};
+
+        TGAColor colA = texture.get(convertTexture(tabTexture[line[i].y].x, sizeT), convertTexture(tabTexture[line[i].y].y, sizeT));
+        TGAColor colB = texture.get(convertTexture(tabTexture[line[i+1].y].x, sizeT), convertTexture(tabTexture[line[i+1].y].y, sizeT));
+        TGAColor colC = texture.get(convertTexture(tabTexture[line[i+2].y].x, sizeT), convertTexture(tabTexture[line[i+2].y].y, sizeT));
+        //
         //Bx - Ax; By - Ay; Bz - Az;
-        point3Df v1 = {tab[0][line[i+1]] - tab[0][line[i]], tab[1][line[i+1]] - tab[1][line[i]], tab[2][line[i+1]] - tab[2][line[i]]};
+        point3Df v1 = {tab[0][line[i+1].x] - tab[0][line[i].x], tab[1][line[i+1].x] - tab[1][line[i].x], tab[2][line[i+1].x] - tab[2][line[i].x]};
         //Cx - Ax; Cy - Cy; Cz - Az;
-        point3Df v2 = {tab[0][line[i+2]] - tab[0][line[i]], tab[1][line[i+2]] - tab[1][line[i]], tab[2][line[i+2]] - tab[2][line[i]]};
+        point3Df v2 = {tab[0][line[i+2].x] - tab[0][line[i].x], tab[1][line[i+2].x] - tab[1][line[i].x], tab[2][line[i+2].x] - tab[2][line[i].x]};
 
         //Produit vectorielle du triangle
         vec3Df crossV = crossProduct(v1, v2);
@@ -67,8 +79,12 @@ void drawFace(char* filename){
         float cos = (crossV.x * light.x + crossV.y * light.y + crossV.z * light.z) / (crossV.norm * light.norm);
         //Produit scalaire entre norme triangle et vecteur de la lumière
         float lighting = crossV.norm * light.norm * cos;
-        if (lighting >0)
-            outils.drawTriangle(A, B, C, image, TGAColor(lighting*255, lighting*0, lighting*255, 255), zbuffer);
+        if (lighting >0) {
+            colA.bgra[0] *= lighting;
+            colA.bgra[1] *= lighting;
+            colA.bgra[2] *= lighting;
+            outils.drawTriangle(A, B, C, image, colA, zbuffer);
+        }
     }
     image.flip_vertically();
     image.write_tga_file("output.tga");

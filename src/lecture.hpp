@@ -14,12 +14,14 @@
 #include <fstream>
 #include <vector>
 #include "tgaimage.h"
+#include "outils.hpp"
 
 class Lecture {
 public:
     Lecture();
-    std::vector<int> readline(char *filename);
+    std::vector<point2D> readline(char *filename);
     std::vector<std::vector<float> > readfile(char *filename);
+    std::vector<point3Df> readTexture(char *filename);
 };
 
 
