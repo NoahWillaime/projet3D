@@ -80,10 +80,11 @@ void drawFace(char* filename){
         //Produit scalaire entre norme triangle et vecteur de la lumière
         float lighting = crossV.norm * light.norm * cos;
         if (lighting >0) {
-            colA.bgra[0] *= lighting;
-            colA.bgra[1] *= lighting;
-            colA.bgra[2] *= lighting;
-            outils.drawTriangle(A, B, C, image, colA, zbuffer);
+            colA = colA*(lighting);
+            colB = colB*(lighting);
+            colC = colC*(lighting);
+            TGAColor colors[] = {colA, colB, colC};
+            outils.drawTriangle(A, B, C, image, colors, zbuffer);
         }
     }
     image.flip_vertically();

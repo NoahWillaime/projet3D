@@ -22,9 +22,9 @@ std::vector<point3Df> Lecture::readTexture(char *filename) {
                 while(getline(iss, part, ' ')){
                     line_parts.push_back(part);
                 }
-                float x = strtof((line_parts[1]).c_str(), 0);
-                float y = strtof((line_parts[2]).c_str(), 0);
-                float z = strtof((line_parts[3]).c_str(), 0);
+                float x = strtof((line_parts[2]).c_str(), 0);
+                float y = strtof((line_parts[3]).c_str(), 0);
+                float z = strtof((line_parts[4]).c_str(), 0);
                 point3Df p = {x, y, z};
                 tab.push_back(p);
             }
