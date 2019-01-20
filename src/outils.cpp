@@ -67,18 +67,18 @@ int Outils::getMax(int *param) {
     return max;
 }
 
-vector<point2D> Outils::boundingBox(point3D A, point3D B, point3D C) {
+vector<point2Df> Outils::boundingBox(point3Df A, point3Df B, point3Df C) {
     int pointX[] = {A.x, B.x, C.x};
     int pointY[] = {A.y, B.y, C.y};
-    vector<point2D> boundingBox;
-    point2D minBox = {getMin(pointX), getMin(pointY)};
-    point2D maxBox = {getMax(pointX), getMax(pointY)};
+    vector<point2Df> boundingBox;
+    point2Df minBox = {getMin(pointX), getMin(pointY)};
+    point2Df maxBox = {getMax(pointX), getMax(pointY)};
     boundingBox.push_back(minBox);
     boundingBox.push_back(maxBox);
     return boundingBox;
 }
 
-point3Df Outils::barycentric(point2D p, point3D A, point3D B, point3D C){
+point3Df Outils::barycentric(point2Df p, point3Df A, point3Df B, point3Df C){
     float div = A.x*B.y + B.x*C.y + C.x*A.y - A.y*B.x - B.y*C.x - C.y*A.x;
     float p1 = (p.x*B.y + B.x*C.y + C.x*p.y - p.y*B.x - B.y*C.x - C.y*p.x) / div;
     float p2 = (A.x*p.y + p.x*C.y + C.x*A.y - A.y*p.x - p.y*C.x - C.y*A.x) / div;
@@ -95,23 +95,25 @@ point2Df barycentricColor(point2Df *pts, point3Df barCor){
     return bpoint;
 }
 
-void Outils::drawTriangle(point3D A, point3D B, point3D C, TGAImage &image, TGAImage texture, point2Df *pts, int *zbuffer, float lighting) {
-    vector<point2D> bBox = boundingBox(A, B, C);
+void Outils::drawTriangle(point3Df *coords, TGAImage &image, TGAImage texture, point2Df *pts, int *zbuffer, float lighting) {
+    vector<point2Df> bBox = boundingBox(coords[0], coords[1], coords[2]);
     int z = 0;
-    for (int x = bBox[0].x; x < bBox[1].x; x++){
-        for (int y = bBox[0].y; y < bBox[1].y; y++){
-            point2D p = {x, y};
-            point3Df b = barycentric(p, A, B, C);
+    TGAColor color;
+    point2Df bpoint;
+    for (float x = bBox[0].x; x <= bBox[1].x; x++){
+        for (float y = bBox[0].y; y <= bBox[1].y; y++){
+            point2Df p = {x, y};
+            point3Df b = barycentric(p, coords[0], coords[1], coords[2]);
             if (b.x < 0 || b.y < 0 || b.z < 0){
                 continue;
             } else {
-                z = A.z * b.x + B.z * b.y + C.z * b.z;
-                if (zbuffer[x+y*800] < z) {
-                    zbuffer[x+y*800] = z;
-                    point2Df bpoint = barycentricColor(pts, b);
+                z = coords[0].z * b.x + coords[1].z * b.y + coords[2].z * b.z;
+                if (zbuffer[int(x+y*800)] < z) {
+                    zbuffer[int(x+y*800)] = z;
+                    bpoint = barycentricColor(pts, b);
                     bpoint.x *= texture.get_width();
                     bpoint.y *= texture.get_width();
-                    TGAColor color = texture.get(bpoint.x, bpoint.y);
+                    color = texture.get(bpoint.x, bpoint.y);
                     color[0] *= lighting;
                     color[1] *= lighting;
                     color[2] *= lighting;

@@ -42,12 +42,12 @@ class Outils {
 private:
     int getMin(int *param);
     int getMax(int *param);
-    std::vector<point2D> boundingBox(point3D A, point3D B, point3D C);
-    point3Df barycentric(point2D p, point3D A, point3D B, point3D C);
+    std::vector<point2Df> boundingBox(point3Df A, point3Df B, point3Df C);
+    point3Df barycentric(point2Df p, point3Df A, point3Df B, point3Df C);
 public:
     Outils();
     std::vector<std::vector<int> > drawLine(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color);
-    void drawTriangle(point3D A, point3D B, point3D C, TGAImage &image, TGAImage texture, point2Df *pts, int *zbuffer, float lighting);
+    void drawTriangle(point3Df *coords, TGAImage &image, TGAImage texture, point2Df *pts, int *zbuffer, float lighting);
 };
 
 
