@@ -28,7 +28,7 @@ int world2screen(float x) {
 }
 
 int convertTexture(float x, int sizeT){
-    return (x+1)*sizeT/2;
+    return x*sizeT;
 }
 
 vec3Df crossProduct(point3Df v1, point3Df v2){
@@ -48,6 +48,7 @@ void drawFace(char* filename){
     vec3Df light = vec3Df(0, 0, 1);
     TGAImage texture;
     texture.read_tga_file("../obj/head_diffuse.tga");
+    texture.flip_vertically();
     int *zbuffer = new int[size * size];
     int sizeT = texture.get_width();
     for (int i = 0; i < size; i++){
@@ -56,13 +57,15 @@ void drawFace(char* filename){
         }
     }
     for (int i = 0; i < line.size(); i+=3){
+        //Sommets
         point3D A = {world2screen(tab[0][line[i].x]), world2screen(tab[1][line[i].x]), world2screen(tab[2][line[i].x])};
         point3D B = {world2screen(tab[0][line[i+1].x]), world2screen(tab[1][line[i+1].x]),  world2screen(tab[2][line[i+1].x])};
         point3D C = {world2screen(tab[0][line[i+2].x]), world2screen(tab[1][line[i+2].x]),  world2screen(tab[2][line[i+2].x])};
 
-        TGAColor colA = texture.get(convertTexture(tabTexture[line[i].y].x, sizeT), convertTexture(tabTexture[line[i].y].y, sizeT));
-        TGAColor colB = texture.get(convertTexture(tabTexture[line[i+1].y].x, sizeT), convertTexture(tabTexture[line[i+1].y].y, sizeT));
-        TGAColor colC = texture.get(convertTexture(tabTexture[line[i+2].y].x, sizeT), convertTexture(tabTexture[line[i+2].y].y, sizeT));
+        //Couleur des sommets
+        point2Df colA = {tabTexture[line[i].y].x, tabTexture[line[i].y].y};
+        point2Df colB = {tabTexture[line[i+1].y].x, tabTexture[line[i+1].y].y};
+        point2Df colC = {tabTexture[line[i+2].y].x, tabTexture[line[i+2].y].y};
         //
         //Bx - Ax; By - Ay; Bz - Az;
         point3Df v1 = {tab[0][line[i+1].x] - tab[0][line[i].x], tab[1][line[i+1].x] - tab[1][line[i].x], tab[2][line[i+1].x] - tab[2][line[i].x]};
@@ -71,22 +74,41 @@ void drawFace(char* filename){
 
         //Produit vectorielle du triangle
         vec3Df crossV = crossProduct(v1, v2);
-
+        //Normalisation des vecteurs
         crossV.normalize();
         light.normalize();
 
-        //cosinus
+        //Calcul du cosinus
         float cos = (crossV.x * light.x + crossV.y * light.y + crossV.z * light.z) / (crossV.norm * light.norm);
         //Produit scalaire entre norme triangle et vecteur de la lumière
         float lighting = crossV.norm * light.norm * cos;
         if (lighting >0) {
-            colA = colA*(lighting);
-            colB = colB*(lighting);
-            colC = colC*(lighting);
-            TGAColor colors[] = {colA, colB, colC};
-            outils.drawTriangle(A, B, C, image, colors, zbuffer);
+            point2Df pts[3] = {colA, colB, colC};
+            outils.drawTriangle(A, B, C, image, texture, pts, zbuffer, lighting);
         }
     }
+    image.flip_vertically();
+    image.write_tga_file("output.tga");
+}
+
+void testtriangle(char *filename){
+    Lecture lecture;
+    vector<vector<float> > tab = lecture.readfile(filename);
+    vector<point2D> line = lecture.readline(filename);
+    vector<point3Df> tabTexture = lecture.readTexture(filename);
+    Outils outils;
+    TGAImage image(size, size, TGAImage::RGB);
+    TGAColor colors[] = {green, red, purple};
+    point3D A = {100, 100, 0};
+    point3D B = {0, 600, 0};
+    point3D C = {600, 100, 0};
+    int *zbuffer = new int[size * size];
+    for (int i = 0; i < size; i++){
+        for (int j = 0; j < size; j++){
+            zbuffer[i+j*size] = numeric_limits<int>::min();
+        }
+    }
+  //  outils.drawTriangle(A, B, C, image, colors, zbuffer);
     image.flip_vertically();
     image.write_tga_file("output.tga");
 }
@@ -102,13 +124,14 @@ int main(int argc, char **argv){
     return -1;
   }
   drawFace(argv[1]);
- /* int width = size;
-  TGAImage render(width, 16, TGAImage::RGB);
-  int ybuffer[width];
-  for (int i = 0; i<width;i++) {
-    ybuffer[i] = numeric_limits<int>::min();
-    render.set(i, 0, yellow);
-  }*/
+//    testtriangle(argv[1]);
+    /* int width = size;
+     TGAImage render(width, 16, TGAImage::RGB);
+     int ybuffer[width];
+     for (int i = 0; i<width;i++) {
+       ybuffer[i] = numeric_limits<int>::min();
+       render.set(i, 0, yellow);
+     }*/
   //render.flip_vertically();
   //render.write_tga_file("render.tga");
 }

@@ -87,16 +87,15 @@ point3Df Outils::barycentric(point2D p, point3D A, point3D B, point3D C){
     return b;
 }
 
-TGAColor barycentricColor(TGAColor *colors, point3Df barCor){
-    TGAColor color;
-    color[0] = (colors[0][0]*barCor.x+colors[1][0]*barCor.y+colors[2][0]*barCor.z);
-    color[1] = (colors[0][1]*barCor.x+colors[1][1]*barCor.y+colors[2][1]*barCor.z);
-    color[2] = (colors[0][2]*barCor.x+colors[1][2]*barCor.y+colors[2][2]*barCor.z);
-    color[3] = 255;
-    return color;
+point2Df barycentricColor(point2Df *pts, point3Df barCor){
+    point2Df bpoint;
+
+    bpoint.x = pts[0].x * barCor.x + pts[1].x * barCor.y + pts[2].x * barCor.z;
+    bpoint.y = pts[0].y * barCor.x + pts[1].y * barCor.y + pts[2].y * barCor.z;
+    return bpoint;
 }
 
-void Outils::drawTriangle(point3D A, point3D B, point3D C, TGAImage &image, TGAColor *colors, int *zbuffer) {
+void Outils::drawTriangle(point3D A, point3D B, point3D C, TGAImage &image, TGAImage texture, point2Df *pts, int *zbuffer, float lighting) {
     vector<point2D> bBox = boundingBox(A, B, C);
     int z = 0;
     for (int x = bBox[0].x; x < bBox[1].x; x++){
@@ -109,7 +108,13 @@ void Outils::drawTriangle(point3D A, point3D B, point3D C, TGAImage &image, TGAC
                 z = A.z * b.x + B.z * b.y + C.z * b.z;
                 if (zbuffer[x+y*800] < z) {
                     zbuffer[x+y*800] = z;
-                    TGAColor color = barycentricColor(colors, b);
+                    point2Df bpoint = barycentricColor(pts, b);
+                    bpoint.x *= texture.get_width();
+                    bpoint.y *= texture.get_width();
+                    TGAColor color = texture.get(bpoint.x, bpoint.y);
+                    color[0] *= lighting;
+                    color[1] *= lighting;
+                    color[2] *= lighting;
                     image.set(x, y, color);
                 }
             }

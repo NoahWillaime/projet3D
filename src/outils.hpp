@@ -47,7 +47,7 @@ private:
 public:
     Outils();
     std::vector<std::vector<int> > drawLine(int x0, int y0, int x1, int y1, TGAImage &image, TGAColor color);
-    void drawTriangle(point3D A, point3D B, point3D C, TGAImage &image, TGAColor *color, int *zbuffer);
+    void drawTriangle(point3D A, point3D B, point3D C, TGAImage &image, TGAImage texture, point2Df *pts, int *zbuffer, float lighting);
 };
 
 
