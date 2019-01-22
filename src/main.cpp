@@ -6,6 +6,7 @@
 #include "outils.hpp"
 #include "lecture.hpp"
 #include "vec3Df.hpp"
+#include "matrice.h"
 
 using namespace std;
 const int size = 800;
@@ -99,14 +100,4 @@ int main(int argc, char **argv){
     return -1;
   }
   drawFace(argv[1]);
-//    testtriangle(argv[1]);
-    /* int width = size;
-     TGAImage render(width, 16, TGAImage::RGB);
-     int ybuffer[width];
-     for (int i = 0; i<width;i++) {
-       ybuffer[i] = numeric_limits<int>::min();
-       render.set(i, 0, yellow);
-     }*/
-  //render.flip_vertically();
-  //render.write_tga_file("render.tga");
 }
