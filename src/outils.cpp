@@ -3,6 +3,7 @@
 //
 
 #include "outils.hpp"
+#include "matrice.h"
 
 using namespace std;
 

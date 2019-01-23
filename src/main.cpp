@@ -10,29 +10,68 @@
 
 using namespace std;
 const int size = 800;
+const int depth = 255;
 
-const TGAColor white = TGAColor(255, 255, 255, 255);
-const TGAColor red   = TGAColor(255, 0,   0,   255);
-const TGAColor blue = TGAColor(0, 0, 255, 255);
-const TGAColor green = TGAColor(0, 255, 0, 255);
-const TGAColor yellow = TGAColor(255, 255, 0, 255);
-const TGAColor orange = TGAColor(255, 165, 0, 255);
-const TGAColor pink = TGAColor(255, 192, 203, 255);
-const TGAColor maroon = TGAColor(128, 0, 0, 255);
-const TGAColor cyan = TGAColor(0, 255, 255, 255);
-const TGAColor grey = TGAColor(128, 128, 128, 255);
-const TGAColor darkgrey = TGAColor(47, 79, 79, 255);
-const TGAColor purple = TGAColor(128, 0, 128, 255);
-
-float world2screen(float x) {
-  return (x+1)*size/2;
+Matrice viewport(float x, float y, float width, float height){
+    Matrice m3 = Matrice(4, 4);
+    m3.identity();
+    m3.set(3,0,x+width/2.f);
+    m3.set(3,1,y+height/2.f);
+    m3.set(3,2,depth/2.f);
+    m3.set(0, 0, width/2.f);
+    m3.set(1, 1, height/2.f);
+    m3.set(2, 2, depth/2.f);
+    return m3;
 }
 
-vec3Df crossProduct(point3Df v1, point3Df v2){
+point3Df perspective(float x, float y, float z, Matrice m){
+    point3Df cam = {0, 0, 3};
+    Matrice m1 = Matrice(1, 3);
+    m1.set(0, 0, x);
+    m1.set(0, 1, y);
+    m1.set(0, 2, z);
+    m1 = m1.augmenter();
+    m1.multiply(m);
+    Matrice m2 = Matrice(3, 3);
+    m2.identity();
+    m2 = m2.augmenter(cam);
+    m1.multiply(m2);
+    m1.multiply(viewport(size/8, size/8, size*3/4, size*3/4));
+    m1 = m1.reduire();
+    point3Df p = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2)};
+    return p;
+}
+
+vec3Df crossProduct(vec3Df v1, vec3Df v2){
   float x = v1.y * v2.z - v1.z * v2.y;
   float y = v1.z * v2.x - v1.x * v2.z;
   float z = v1.x * v2.y - v1.y * v2.x;
   return vec3Df(x, y, z);
+}
+
+vec3Df substractM(vec3Df a, vec3Df b){
+    return vec3Df(a.x-b.x, a.y-b.y, a.z-b.z);
+}
+
+Matrice setLook(vec3Df eye, vec3Df center, vec3Df up){
+    vec3Df z = substractM(eye, center);
+    z.normalize();
+    vec3Df x = crossProduct(up, z);
+    x.normalize();
+    vec3Df y = crossProduct(z, x);
+    y.normalize();
+    Matrice m1 = Matrice(4,4);
+    m1.identity();
+    Matrice m2 = Matrice(4,4);
+    m2.identity();
+    for (int i = 0; i < 3; i++){
+        m1.set(i, 0, x[i]);
+        m1.set(i, 1, y[i]);
+        m1.set(i, 2, z[i]);
+        m2.set(3, i, -center[i]);
+    }
+    m1.multiply(m2);
+    return m1;
 }
 
 void drawFace(char* filename){
@@ -46,6 +85,11 @@ void drawFace(char* filename){
     TGAImage texture;
     texture.read_tga_file("../obj/head_diffuse.tga");
     texture.flip_vertically();
+
+    vec3Df eye = vec3Df(0, 10, 10);
+    vec3Df center = vec3Df(20, 2, 3);
+    vec3Df u = vec3Df(0, 1, 10);
+    Matrice m = setLook(eye, center, u);
     int *zbuffer = new int[size * size];
     int sizeT = texture.get_width();
     for (int i = 0; i < size; i++){
@@ -63,9 +107,9 @@ void drawFace(char* filename){
         point2Df colB = {tabTexture[line[i+1].y].x, tabTexture[line[i+1].y].y};
         point2Df colC = {tabTexture[line[i+2].y].x, tabTexture[line[i+2].y].y};
         //Bx - Ax; By - Ay; Bz - Az;
-        point3Df v1 = {B.x - A.x, B.y - A.y, B.z - A.z};
+        vec3Df v1 = vec3Df(B.x - A.x, B.y - A.y, B.z - A.z);
         //Cx - Ax; Cy - Ay; Cz - Az;
-        point3Df v2 = {C.x - A.x, C.y - A.y, C.z - A.z};
+        vec3Df v2 = vec3Df(C.x - A.x, C.y - A.y, C.z - A.z);
         //Produit vectorielle du triangle
         vec3Df crossV = crossProduct(v1, v2);
         //Normalisation des vecteurs
@@ -76,9 +120,9 @@ void drawFace(char* filename){
         //Produit scalaire entre norme triangle et vecteur de la lumière
         float lighting = crossV.norm * light.norm * cos;
         //Coordonne pour l'écran
-        point3Df wA = {world2screen(A.x), world2screen(A.y), world2screen(A.z)};
-        point3Df wB = {world2screen(B.x), world2screen(B.y), world2screen(B.z)};
-        point3Df wC = {world2screen(C.x), world2screen(C.y), world2screen(C.z)};
+        point3Df wA = perspective(A.x, A.y,A.z, m);
+        point3Df wB = perspective(B.x, B.y,B.z,m);
+        point3Df wC = perspective(C.x, C.y,C.z,m);
         if (lighting >0) {
             point2Df pts[3] = {colA, colB, colC};
             point3Df coord[3] = {wA, wB, wC};
@@ -87,11 +131,6 @@ void drawFace(char* filename){
     }
     image.flip_vertically();
     image.write_tga_file("output.tga");
-}
-
-void rasterize(point2D p0, point2D p1, TGAImage &image, TGAColor color, int ybuffer[]){
-  if (p0.x >p1.x)
-    swap(p0, p1);
 }
 
 int main(int argc, char **argv){

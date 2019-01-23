@@ -15,6 +15,7 @@ private:
 public:
     Matrice(int width, int height);
     void multiply(Matrice mat);
+    void identity();
     Matrice reduire();
     Matrice augmenter(point3Df camera);
     Matrice augmenter();

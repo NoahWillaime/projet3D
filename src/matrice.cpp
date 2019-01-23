@@ -17,6 +17,15 @@ int Matrice::get_width() { return width; }
 int Matrice::get_height() { return height; }
 float Matrice::get(int x, int y) { return matrix[y][x]; }
 
+void Matrice::identity() {
+    for (int i = 0; i < height; i++){
+        for (int j = 0; j < width; j++){
+            if (i == j)
+                matrix[i][j] = 1;
+        }
+    }
+}
+
 void Matrice::set(int x, int y, float p) {
     if (x >= 0 && x < width && y >=0 && y < height){
         matrix[y][x] = p;
