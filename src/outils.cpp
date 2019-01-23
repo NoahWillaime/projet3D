@@ -49,7 +49,7 @@ vector<vector<int> > Outils::drawLine(int x0, int y0, int x1, int y1, TGAImage &
     return tab;
 }
 
-int Outils::getMin(int *param) {
+float Outils::getMin(float *param) {
     int min = numeric_limits<int>::max();
     for (int i = 0; i < 3; i++){
         if (min > param[i])
@@ -58,7 +58,7 @@ int Outils::getMin(int *param) {
     return min;
 }
 
-int Outils::getMax(int *param) {
+float Outils::getMax(float *param) {
     int max = numeric_limits<int>::min();
     for (int i = 0; i < 3; i++){
         if (max < param[i])
@@ -68,8 +68,8 @@ int Outils::getMax(int *param) {
 }
 
 vector<point2Df> Outils::boundingBox(point3Df A, point3Df B, point3Df C) {
-    int pointX[] = {A.x, B.x, C.x};
-    int pointY[] = {A.y, B.y, C.y};
+    float pointX[] = {A.x, B.x, C.x};
+    float pointY[] = {A.y, B.y, C.y};
     vector<point2Df> boundingBox;
     point2Df minBox = {getMin(pointX), getMin(pointY)};
     point2Df maxBox = {getMax(pointX), getMax(pointY)};
