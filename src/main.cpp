@@ -86,12 +86,11 @@ void drawFace(char* filename){
     texture.read_tga_file("../obj/head_diffuse.tga");
     texture.flip_vertically();
 
-    vec3Df eye = vec3Df(0, 10, 10);
-    vec3Df center = vec3Df(20, 2, 3);
-    vec3Df u = vec3Df(0, 1, 10);
+    vec3Df eye = vec3Df(1, 1, 3);
+    vec3Df center = vec3Df(0, 0, 0);
+    vec3Df u = vec3Df(0, 1, 0);
     Matrice m = setLook(eye, center, u);
     int *zbuffer = new int[size * size];
-    int sizeT = texture.get_width();
     for (int i = 0; i < size; i++){
         for (int j = 0; j < size; j++){
             zbuffer[i+j*size] = numeric_limits<int>::min();
