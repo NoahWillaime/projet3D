@@ -31,7 +31,7 @@ point3Df perspective(float x, float y, float z, Matrice m){
     m1.set(0, 1, y);
     m1.set(0, 2, z);
     m1 = m1.augmenter();
-    m1.multiply(m);
+  //  m1.multiply(m);
     Matrice m2 = Matrice(3, 3);
     m2.identity();
     m2 = m2.augmenter(cam);
@@ -74,6 +74,17 @@ Matrice setLook(vec3Df eye, vec3Df center, vec3Df up){
     return m1;
 }
 
+point3Df turnPlan(point3Df p, Matrice m){
+    Matrice m1 = Matrice(1, 3);
+    m1.set(0, 0, p.x);
+    m1.set(0, 1, p.y);
+    m1.set(0, 2, p.z);
+    m1 = m1.augmenter();
+    m1.multiply(m);
+    point3Df p2 = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2)};
+    return p2;
+}
+
 void drawFace(char* filename){
     Lecture lecture;
     vector<vector<float> > tab = lecture.readfile(filename);
@@ -105,6 +116,11 @@ void drawFace(char* filename){
         point2Df colA = {tabTexture[line[i].y].x, tabTexture[line[i].y].y};
         point2Df colB = {tabTexture[line[i+1].y].x, tabTexture[line[i+1].y].y};
         point2Df colC = {tabTexture[line[i+2].y].x, tabTexture[line[i+2].y].y};
+
+        A = turnPlan(A, m);
+        B = turnPlan(B, m);
+        C = turnPlan(C, m);
+
         //Bx - Ax; By - Ay; Bz - Az;
         vec3Df v1 = vec3Df(B.x - A.x, B.y - A.y, B.z - A.z);
         //Cx - Ax; Cy - Ay; Cz - Az;
@@ -119,7 +135,7 @@ void drawFace(char* filename){
         //Produit scalaire entre norme triangle et vecteur de la lumière
         float lighting = crossV.norm * light.norm * cos;
         //Coordonne pour l'écran
-        point3Df wA = perspective(A.x, A.y,A.z, m);
+        point3Df wA = perspective(A.x, A.y,A.z,m);
         point3Df wB = perspective(B.x, B.y,B.z,m);
         point3Df wC = perspective(C.x, C.y,C.z,m);
         if (lighting >0) {
