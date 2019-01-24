@@ -14,6 +14,7 @@ private:
     float **matrix;
 public:
     Matrice(int width, int height);
+    ~Matrice();
     void multiply(Matrice mat);
     Matrice reduire();
     Matrice augmenter(point3Df camera);

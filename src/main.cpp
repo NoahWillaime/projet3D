@@ -85,6 +85,7 @@ void drawFace(char* filename){
             outils.drawTriangle(coord, image, texture, pts, zbuffer, lighting);
         }
     }
+    delete[] zbuffer;
     image.flip_vertically();
     image.write_tga_file("output.tga");
 }
