@@ -13,12 +13,6 @@ Matrice::Matrice(int width, int height):width(width), height(height) {
     }
 }
 
-Matrice::~Matrice() {
-    for (int i = 0; i < height; i++){
-        delete matrix[i];
-    }
-}
-
 int Matrice::get_width() { return width; }
 int Matrice::get_height() { return height; }
 float Matrice::get(int x, int y) { return matrix[y][x]; }

@@ -14,7 +14,6 @@ private:
     float **matrix;
 public:
     Matrice(int width, int height);
-    ~Matrice();
     void multiply(Matrice mat);
     void identity();
     Matrice reduire();
