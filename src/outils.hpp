@@ -26,12 +26,6 @@ struct point2Df{
     float y;
 };
 
-struct point3D{
-    int x;
-    int y;
-    int z;
-};
-
 struct point3Df{
     float x;
     float y;
