@@ -26,12 +26,6 @@ struct point2Df{
     float y;
 };
 
-struct point3D{
-    int x;
-    int y;
-    int z;
-};
-
 struct point3Df{
     float x;
     float y;
@@ -40,8 +34,8 @@ struct point3Df{
 
 class Outils {
 private:
-    int getMin(int *param);
-    int getMax(int *param);
+    float getMin(float *param);
+    float getMax(float *param);
     std::vector<point2Df> boundingBox(point3Df A, point3Df B, point3Df C);
     point3Df barycentric(point2Df p, point3Df A, point3Df B, point3Df C);
 public:

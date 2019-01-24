@@ -13,3 +13,12 @@ void vec3Df::normalize() {
     y /= norm;
     z /= norm;
 }
+
+float vec3Df::operator[](const int i) {
+    if (i == 0)
+        return x;
+    else if(i==1)
+        return y;
+    else if (i == 2)
+        return z;
+}

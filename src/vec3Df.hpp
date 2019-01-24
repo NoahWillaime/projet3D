@@ -13,9 +13,9 @@ public:
     float y;
     float z;
     float norm;
-
     vec3Df(float x1, float y1, float z1);
     void normalize();
+    float operator[](const int i);
 };
 
 
