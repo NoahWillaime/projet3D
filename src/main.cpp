@@ -11,6 +11,8 @@
 using namespace std;
 const int size = 800;
 const int depth = 255;
+const vec3Df eye = vec3Df(1, 1, 3);
+const vec3Df up = vec3Df(0, 1, 0);
 
 Matrice viewport(float x, float y, float width, float height){
     Matrice m3 = Matrice(4, 4);
@@ -24,19 +26,18 @@ Matrice viewport(float x, float y, float width, float height){
     return m3;
 }
 
-point3Df perspective(float x, float y, float z){
+point3Df perspectiveViewPort(point3Df point){
     point3Df cam = {0, 0, 3};
     Matrice m1 = Matrice(1, 3);
-    m1.set(0, 0, x);
-    m1.set(0, 1, y);
-    m1.set(0, 2, z);
+    m1.set(0, 0, point.x);
+    m1.set(0, 1, point.y);
+    m1.set(0, 2, point.z);
     m1 = m1.augmenter();
     Matrice m2 = Matrice(3, 3);
     m2.identity();
     m2 = m2.augmenter(cam);
     m1.multiply(m2);
     m1.multiply(viewport(size/8, size/8, size*3/4, size*3/4));
-    m1 = m1.reduire();
     point3Df p = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2)};
     return p;
 }
@@ -52,7 +53,7 @@ vec3Df substractM(vec3Df a, vec3Df b){
     return vec3Df(a.x-b.x, a.y-b.y, a.z-b.z);
 }
 
-Matrice setLook(vec3Df eye, vec3Df center, vec3Df up){
+Matrice setLook(vec3Df center){
     vec3Df z = substractM(eye, center);
     z.normalize();
     vec3Df x = crossProduct(up, z);
@@ -73,7 +74,7 @@ Matrice setLook(vec3Df eye, vec3Df center, vec3Df up){
     return m1;
 }
 
-point3Df turnPlan(point3Df p, Matrice m){
+point3Df view(point3Df p, Matrice m){
     Matrice m1 = Matrice(1, 3);
     m1.set(0, 0, p.x);
     m1.set(0, 1, p.y);
@@ -95,10 +96,8 @@ void drawFace(char* filename){
     TGAImage texture;
     texture.read_tga_file("../obj/head_diffuse.tga");
     texture.flip_vertically();
-    vec3Df eye = vec3Df(1, 1, 3);
     vec3Df center = vec3Df(0, 0, 0);
-    vec3Df u = vec3Df(0, 1, 0);
-    Matrice m = setLook(eye, center, u);
+    Matrice m = setLook(center);
     int *zbuffer = new int[size * size];
     for (int i = 0; i < size; i++){
         for (int j = 0; j < size; j++){
@@ -110,13 +109,6 @@ void drawFace(char* filename){
         point3Df A = {tab[0][line[i].x], tab[1][line[i].x], tab[2][line[i].x]};
         point3Df B = {tab[0][line[i+1].x], tab[1][line[i+1].x],  tab[2][line[i+1].x]};
         point3Df C = {tab[0][line[i+2].x], tab[1][line[i+2].x],  tab[2][line[i+2].x]};
-        //Couleur des sommets
-        point2Df colA = {tabTexture[line[i].y].x, tabTexture[line[i].y].y};
-        point2Df colB = {tabTexture[line[i+1].y].x, tabTexture[line[i+1].y].y};
-        point2Df colC = {tabTexture[line[i+2].y].x, tabTexture[line[i+2].y].y};
-        A = turnPlan(A, m);
-        B = turnPlan(B, m);
-        C = turnPlan(C, m);
         //Bx - Ax; By - Ay; Bz - Az;
         vec3Df v1 = vec3Df(B.x - A.x, B.y - A.y, B.z - A.z);
         //Cx - Ax; Cy - Ay; Cz - Az;
@@ -130,17 +122,20 @@ void drawFace(char* filename){
         float cos = (crossV.x * light.x + crossV.y * light.y + crossV.z * light.z) / (crossV.norm * light.norm);
         //Produit scalaire entre norme triangle et vecteur de la lumière
         float lighting = crossV.norm * light.norm * cos;
-        //Coordonne pour l'écran
-        point3Df wA = perspective(A.x, A.y,A.z);
-        point3Df wB = perspective(B.x, B.y,B.z);
-        point3Df wC = perspective(C.x, C.y,C.z);
+        //Transformations
+        point3Df wA = perspectiveViewPort(view(A, m));
+        point3Df wB = perspectiveViewPort(view(B, m));
+        point3Df wC = perspectiveViewPort(view(C, m));
         if (lighting >0) {
+            //Couleur des sommets
+            point2Df colA = {tabTexture[line[i].y].x, tabTexture[line[i].y].y};
+            point2Df colB = {tabTexture[line[i+1].y].x, tabTexture[line[i+1].y].y};
+            point2Df colC = {tabTexture[line[i+2].y].x, tabTexture[line[i+2].y].y};
             point2Df pts[3] = {colA, colB, colC};
             point3Df coord[3] = {wA, wB, wC};
             outils.drawTriangle(coord, image, texture, pts, zbuffer, lighting);
         }
     }
-    delete[] zbuffer;
     image.flip_vertically();
     image.write_tga_file("output.tga");
 }

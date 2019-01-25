@@ -109,7 +109,7 @@ void Outils::drawTriangle(point3Df *coords, TGAImage &image, TGAImage texture, p
                 continue;
             } else {
                 z = coords[0].z * b.x + coords[1].z * b.y + coords[2].z * b.z;
-                if (zbuffer[int(x+y*800)] < z) {
+                if (x+y*800 > 0 && zbuffer[int(x+y*800)] < z) {
                     zbuffer[int(x+y*800)] = z;
                     bpoint = barycentricColor(pts, b);
                     bpoint.x *= texture.get_width();
