@@ -37,6 +37,8 @@ point3Df perspectiveViewPort(point3Df point){
     m2.identity();
     m2 = m2.augmenter(cam);
     m1.multiply(m2);
+    m1 = m1.reduire();
+    m1 = m1.augmenter();
     m1.multiply(viewport(size/8, size/8, size*3/4, size*3/4));
     point3Df p = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2)};
     return p;
@@ -92,10 +94,11 @@ void drawFace(char* filename){
     vector<point3Df> tabTexture = lecture.readTexture(filename);
     Outils outils;
     TGAImage image(size, size, TGAImage::RGB);
-    vec3Df light = vec3Df(0, 0, 1);
     TGAImage texture;
     texture.read_tga_file("../obj/head_diffuse.tga");
     texture.flip_vertically();
+    vec3Df light = vec3Df(1, 0, 1);
+    light.normalize();
     vec3Df center = vec3Df(0, 0, 0);
     Matrice m = setLook(center);
     int *zbuffer = new int[size * size];
@@ -117,7 +120,6 @@ void drawFace(char* filename){
         vec3Df crossV = crossProduct(v1, v2);
         //Normalisation des vecteurs
         crossV.normalize();
-        light.normalize();
         //Calcul du cosinus
         float cos = (crossV.x * light.x + crossV.y * light.y + crossV.z * light.z) / (crossV.norm * light.norm);
         //Produit scalaire entre norme triangle et vecteur de la lumière
