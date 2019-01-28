@@ -27,7 +27,7 @@ Matrice viewport(float x, float y, float width, float height){
 }
 
 point3Df perspectiveViewPort(point3Df point){
-    point3Df cam = {0, 0, 3};
+    point3Df cam = {0, 0, eye.z};
     Matrice m1 = Matrice(1, 3);
     m1.set(0, 0, point.x);
     m1.set(0, 1, point.y);
@@ -129,33 +129,19 @@ void drawFace(char* filename){
         point3Df A = {tab[0][line[i].x], tab[1][line[i].x], tab[2][line[i].x]};
         point3Df B = {tab[0][line[i+1].x], tab[1][line[i+1].x],  tab[2][line[i+1].x]};
         point3Df C = {tab[0][line[i+2].x], tab[1][line[i+2].x],  tab[2][line[i+2].x]};
-        //Bx - Ax; By - Ay; Bz - Az;
-        vec3Df v1 = vec3Df(B.x - A.x, B.y - A.y, B.z - A.z);
-        //Cx - Ax; Cy - Ay; Cz - Az;
-        vec3Df v2 = vec3Df(C.x - A.x, C.y - A.y, C.z - A.z);
-        //Produit vectorielle du triangle
-        vec3Df crossV = crossProduct(v1, v2);
-        //Normalisation des vecteurs
-        crossV.normalize();
-        //Calcul du cosinus
-        float cos = (crossV.x * light.x + crossV.y * light.y + crossV.z * light.z) / (crossV.norm * light.norm);
-        //Produit scalaire entre norme triangle et vecteur de la lumière
-        float lighting = crossV.norm * light.norm * cos;
         point3Df lightVector = getLight(normalVector[line[i].x], normalVector[line[i+1].x], normalVector[line[i+2].x], light);
 
         //Transformations
         point3Df wA = perspectiveViewPort(view(A, m));
         point3Df wB = perspectiveViewPort(view(B, m));
         point3Df wC = perspectiveViewPort(view(C, m));
-        //if (lighting >0) {
-            //Couleur des sommets
-            point2Df colA = {tabTexture[line[i].y].x, tabTexture[line[i].y].y};
-            point2Df colB = {tabTexture[line[i+1].y].x, tabTexture[line[i+1].y].y};
-            point2Df colC = {tabTexture[line[i+2].y].x, tabTexture[line[i+2].y].y};
-            point2Df pts[3] = {colA, colB, colC};
-            point3Df coord[3] = {wA, wB, wC};
-            outils.drawTriangle(coord, image, texture, pts, zbuffer, lightVector);
-        //}
+        //Couleur des sommets
+        point2Df colA = {tabTexture[line[i].y].x, tabTexture[line[i].y].y};
+        point2Df colB = {tabTexture[line[i+1].y].x, tabTexture[line[i+1].y].y};
+        point2Df colC = {tabTexture[line[i+2].y].x, tabTexture[line[i+2].y].y};
+        point2Df pts[3] = {colA, colB, colC};
+        point3Df coord[3] = {wA, wB, wC};
+        outils.drawTriangle(coord, image, texture, pts, zbuffer, lightVector);
     }
     image.flip_vertically();
     image.write_tga_file("output.tga");
@@ -166,10 +152,11 @@ int main(int argc, char **argv){
     cerr << "./projet3D filename.obj" << endl;
     return -1;
   }
-    drawFace(argv[1]);
-  /*  Lecture lecture;
-  vector<vec3Df> test = lecture.readNormal(argv[1]);
-  for (int i = 0; i < test.size(); i+=3){
-      cout << test[i].x << " / " << test[i].y << " / " << test[i].z << endl;
-  }*/
+  clock_t begin, end;
+  double time_spent;
+  begin = clock();
+  drawFace(argv[1]);
+  end = clock();
+  time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
+  cout << time_spent << endl;
 }
