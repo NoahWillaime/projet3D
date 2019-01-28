@@ -8,15 +8,13 @@ using namespace std;
 
 Lecture::Lecture(){};
 
-std::vector<point3Df> Lecture::readNormal(char *filename) {
+std::vector<vec3Df> Lecture::readNormal(char *filename) {
     ifstream fichier(filename, ios::in);
     string line;
-    vector<point3Df> tab;
-    point3Df p;
-
+    vector<vec3Df> tab;
     vector<string> line_parts;
     string part;
-
+    float x,y,z;
     if (fichier){
         while (getline(fichier, line)){
             if (line[0] == 'v' && line[1] == 'n' && line[2] == ' '){
@@ -24,10 +22,10 @@ std::vector<point3Df> Lecture::readNormal(char *filename) {
                 while(getline(iss, part, ' ')){
                     line_parts.push_back(part);
                 }
-                p.x = strtof((line_parts[2]).c_str(), 0);
-                p.y = strtof((line_parts[3]).c_str(), 0);
-                p.z = strtof((line_parts[4]).c_str(), 0);
-                tab.push_back(p);
+                x = strtof((line_parts[2]).c_str(), 0);
+                y = strtof((line_parts[3]).c_str(), 0);
+                z = strtof((line_parts[4]).c_str(), 0);
+                tab.push_back(vec3Df(x, y, z));
             }
             line_parts.clear();
         }

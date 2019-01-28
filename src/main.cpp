@@ -87,11 +87,28 @@ point3Df view(point3Df p, Matrice m){
     return p2;
 }
 
+point3Df getLight(vec3Df A, vec3Df B, vec3Df C, vec3Df light){
+    float cos;
+    float lA, lB, lC;
+    A.normalize();
+    B.normalize();
+    C.normalize();
+    cos = (A.x * light.x + A.y * light.y + A.z * light.z) / (A.norm * light.norm);
+    lA = A.norm * light.norm * cos;
+    cos = (B.x * light.x + B.y * light.y + B.z * light.z) / (B.norm * light.norm);
+    lB = B.norm * light.norm * cos;
+    cos = (C.x * light.x + C.y * light.y + C.z * light.z) / (C.norm * light.norm);
+    lC = C.norm * light.norm * cos;
+    point3Df p = {lA, lB, lC};
+    return p;
+}
+
 void drawFace(char* filename){
     Lecture lecture;
     vector<vector<float> > tab = lecture.readfile(filename);
     vector<point2D> line = lecture.readline(filename);
     vector<point3Df> tabTexture = lecture.readTexture(filename);
+    vector<vec3Df> normalVector = lecture.readNormal(filename);
     Outils outils;
     TGAImage image(size, size, TGAImage::RGB);
     TGAImage texture;
@@ -124,19 +141,21 @@ void drawFace(char* filename){
         float cos = (crossV.x * light.x + crossV.y * light.y + crossV.z * light.z) / (crossV.norm * light.norm);
         //Produit scalaire entre norme triangle et vecteur de la lumière
         float lighting = crossV.norm * light.norm * cos;
+        point3Df lightVector = getLight(normalVector[line[i].x], normalVector[line[i+1].x], normalVector[line[i+2].x], light);
+
         //Transformations
         point3Df wA = perspectiveViewPort(view(A, m));
         point3Df wB = perspectiveViewPort(view(B, m));
         point3Df wC = perspectiveViewPort(view(C, m));
-        if (lighting >0) {
+        //if (lighting >0) {
             //Couleur des sommets
             point2Df colA = {tabTexture[line[i].y].x, tabTexture[line[i].y].y};
             point2Df colB = {tabTexture[line[i+1].y].x, tabTexture[line[i+1].y].y};
             point2Df colC = {tabTexture[line[i+2].y].x, tabTexture[line[i+2].y].y};
             point2Df pts[3] = {colA, colB, colC};
             point3Df coord[3] = {wA, wB, wC};
-            outils.drawTriangle(coord, image, texture, pts, zbuffer, lighting);
-        }
+            outils.drawTriangle(coord, image, texture, pts, zbuffer, lightVector);
+        //}
     }
     image.flip_vertically();
     image.write_tga_file("output.tga");
@@ -147,5 +166,10 @@ int main(int argc, char **argv){
     cerr << "./projet3D filename.obj" << endl;
     return -1;
   }
-  drawFace(argv[1]);
+    drawFace(argv[1]);
+  /*  Lecture lecture;
+  vector<vec3Df> test = lecture.readNormal(argv[1]);
+  for (int i = 0; i < test.size(); i+=3){
+      cout << test[i].x << " / " << test[i].y << " / " << test[i].z << endl;
+  }*/
 }

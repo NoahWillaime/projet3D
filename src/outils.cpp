@@ -96,7 +96,11 @@ point2Df barycentricColor(point2Df *pts, point3Df barCor){
     return bpoint;
 }
 
-void Outils::drawTriangle(point3Df *coords, TGAImage &image, TGAImage texture, point2Df *pts, int *zbuffer, float lighting) {
+float barycentricLight(point3Df light, point3Df barCor){
+    return light.x * barCor.x + light.y * barCor.y + light.z * barCor.z;
+}
+
+void Outils::drawTriangle(point3Df *coords, TGAImage &image, TGAImage texture, point2Df *pts, int *zbuffer, point3Df lighting) {
     vector<point2Df> bBox = boundingBox(coords[0], coords[1], coords[2]);
     int z = 0;
     TGAColor color;
@@ -108,17 +112,20 @@ void Outils::drawTriangle(point3Df *coords, TGAImage &image, TGAImage texture, p
             if (b.x < 0 || b.y < 0 || b.z < 0){
                 continue;
             } else {
-                z = coords[0].z * b.x + coords[1].z * b.y + coords[2].z * b.z;
-                if (x+y*800 > 0 && zbuffer[int(x+y*800)] < z) {
-                    zbuffer[int(x+y*800)] = z;
-                    bpoint = barycentricColor(pts, b);
-                    bpoint.x *= texture.get_width();
-                    bpoint.y *= texture.get_width();
-                    color = texture.get(bpoint.x, bpoint.y);
-                    color[0] *= lighting;
-                    color[1] *= lighting;
-                    color[2] *= lighting;
-                    image.set(x, y, color);
+                float test = barycentricLight(lighting, b);
+                if (test > 0){
+                    z = coords[0].z * b.x + coords[1].z * b.y + coords[2].z * b.z;
+                    if (x+y*800 > 0 && zbuffer[int(x+y*800)] < z) {
+                        zbuffer[int(x+y*800)] = z;
+                        bpoint = barycentricColor(pts, b);
+                        bpoint.x *= texture.get_width();
+                        bpoint.y *= texture.get_width();
+                        color = texture.get(bpoint.x, bpoint.y);
+                        color[0] *= test;
+                        color[1] *= test;
+                        color[2] *= test;
+                        image.set(x, y, color);
+                    }
                 }
             }
         }

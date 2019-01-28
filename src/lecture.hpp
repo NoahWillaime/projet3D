@@ -15,6 +15,8 @@
 #include <vector>
 #include "tgaimage.h"
 #include "outils.hpp"
+#include "vec3Df.hpp"
+
 
 class Lecture {
 public:
@@ -22,7 +24,7 @@ public:
     std::vector<point2D> readline(char *filename);
     std::vector<std::vector<float> > readfile(char *filename);
     std::vector<point3Df> readTexture(char *filename);
-    std::vector<point3Df> readNormal(char *filename);
+    std::vector<vec3Df> readNormal(char *filename);
 };
 
 
