@@ -22,6 +22,7 @@ public:
     std::vector<point2D> readline(char *filename);
     std::vector<std::vector<float> > readfile(char *filename);
     std::vector<point3Df> readTexture(char *filename);
+    std::vector<point3Df> readNormal(char *filename);
 };
 
 
