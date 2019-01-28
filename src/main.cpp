@@ -12,7 +12,7 @@
 using namespace std;
 const int size = 800;
 const int depth = 255;
-const vec3Df eye = vec3Df(1, 1, 3);
+const vec3Df eye = vec3Df(4, 1, 5);
 const vec3Df up = vec3Df(0, 1, 0);
 
 Matrice viewport(float x, float y, float width, float height){

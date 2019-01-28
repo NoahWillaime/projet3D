@@ -113,20 +113,20 @@ void Outils::drawTriangle(point3Df *coords, TGAImage &image, TGAImage texture, p
             if (b.x < 0 || b.y < 0 || b.z < 0){
                 continue;
             } else {
-                light = barycentricLight(lighting, b);
-                if (light > 0){
-                    z = coords[0].z * b.x + coords[1].z * b.y + coords[2].z * b.z;
-                    if (x+y*800 > 0 && zbuffer[int(x+y*800)] < z) {
-                        zbuffer[int(x+y*800)] = z;
-                        bpoint = barycentricColor(pts, b);
-                        bpoint.x *= texture.get_width();
-                        bpoint.y *= texture.get_width();
-                        color = texture.get(bpoint.x, bpoint.y);
-                        color[0] *= light;
-                        color[1] *= light;
-                        color[2] *= light;
-                        image.set(x, y, color);
-                    }
+                z = coords[0].z * b.x + coords[1].z * b.y + coords[2].z * b.z;
+                if (x+y*800 > 0 && zbuffer[int(x+y*800)] < z) {
+                    zbuffer[int(x+y*800)] = z;
+                    light = barycentricLight(lighting, b);
+                    if (light < 0)
+                        light = 0;
+                    bpoint = barycentricColor(pts, b);
+                    bpoint.x *= texture.get_width();
+                    bpoint.y *= texture.get_width();
+                    color = texture.get(bpoint.x, bpoint.y);
+                    color[0] *= light;
+                    color[1] *= light;
+                    color[2] *= light;
+                    image.set(x, y, color);
                 }
             }
         }
