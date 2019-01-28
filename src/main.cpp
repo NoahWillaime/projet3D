@@ -2,6 +2,7 @@
 #include <iostream>
 #include <vector>
 #include <limits>
+#include <ctime>
 #include "tgaimage.h"
 #include "outils.hpp"
 #include "lecture.hpp"
@@ -114,7 +115,7 @@ void drawFace(char* filename){
     TGAImage texture;
     texture.read_tga_file("../obj/head_diffuse.tga");
     texture.flip_vertically();
-    vec3Df light = vec3Df(1, 0, 1);
+    vec3Df light = vec3Df(1, -1, 1);
     light.normalize();
     vec3Df center = vec3Df(0, 0, 0);
     Matrice m = setLook(center);
@@ -130,7 +131,6 @@ void drawFace(char* filename){
         point3Df B = {tab[0][line[i+1].x], tab[1][line[i+1].x],  tab[2][line[i+1].x]};
         point3Df C = {tab[0][line[i+2].x], tab[1][line[i+2].x],  tab[2][line[i+2].x]};
         point3Df lightVector = getLight(normalVector[line[i].x], normalVector[line[i+1].x], normalVector[line[i+2].x], light);
-
         //Transformations
         point3Df wA = perspectiveViewPort(view(A, m));
         point3Df wB = perspectiveViewPort(view(B, m));

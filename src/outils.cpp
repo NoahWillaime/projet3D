@@ -103,6 +103,7 @@ float barycentricLight(point3Df light, point3Df barCor){
 void Outils::drawTriangle(point3Df *coords, TGAImage &image, TGAImage texture, point2Df *pts, int *zbuffer, point3Df lighting) {
     vector<point2Df> bBox = boundingBox(coords[0], coords[1], coords[2]);
     int z = 0;
+    float light;
     TGAColor color;
     point2Df bpoint;
     for (float x = bBox[0].x; x <= bBox[1].x; x++){
@@ -112,8 +113,8 @@ void Outils::drawTriangle(point3Df *coords, TGAImage &image, TGAImage texture, p
             if (b.x < 0 || b.y < 0 || b.z < 0){
                 continue;
             } else {
-                float test = barycentricLight(lighting, b);
-                if (test > 0){
+                light = barycentricLight(lighting, b);
+                if (light > 0){
                     z = coords[0].z * b.x + coords[1].z * b.y + coords[2].z * b.z;
                     if (x+y*800 > 0 && zbuffer[int(x+y*800)] < z) {
                         zbuffer[int(x+y*800)] = z;
@@ -121,9 +122,9 @@ void Outils::drawTriangle(point3Df *coords, TGAImage &image, TGAImage texture, p
                         bpoint.x *= texture.get_width();
                         bpoint.y *= texture.get_width();
                         color = texture.get(bpoint.x, bpoint.y);
-                        color[0] *= test;
-                        color[1] *= test;
-                        color[2] *= test;
+                        color[0] *= light;
+                        color[1] *= light;
+                        color[2] *= light;
                         image.set(x, y, color);
                     }
                 }
