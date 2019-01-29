@@ -77,7 +77,7 @@ Matrice setLook(vec3Df center){
     return m1;
 }
 
-point3Df view(point3Df p, Matrice m){
+point3Df view(vec3Df p, Matrice m){
     Matrice m1 = Matrice(1, 3);
     m1.set(0, 0, p.x);
     m1.set(0, 1, p.y);
@@ -106,7 +106,7 @@ point3Df getLight(vec3Df A, vec3Df B, vec3Df C, vec3Df light){
 
 void drawFace(char* filename){
     Lecture lecture;
-    vector<vector<float> > tab = lecture.readfile(filename);
+    vector<vec3Df> tab = lecture.readfile(filename);
     vector<point2D> line = lecture.readline(filename);
     vector<point3Df> tabTexture = lecture.readTexture(filename);
     vector<vec3Df> normalVector = lecture.readNormal(filename);
@@ -127,9 +127,9 @@ void drawFace(char* filename){
     }
     for (int i = 0; i < line.size(); i+=3){
         //Sommets
-        point3Df A = {tab[0][line[i].x], tab[1][line[i].x], tab[2][line[i].x]};
-        point3Df B = {tab[0][line[i+1].x], tab[1][line[i+1].x],  tab[2][line[i+1].x]};
-        point3Df C = {tab[0][line[i+2].x], tab[1][line[i+2].x],  tab[2][line[i+2].x]};
+        vec3Df A = tab[line[i].x];
+        vec3Df B = tab[line[i+1].x];
+        vec3Df C = tab[line[i+2].x];
         point3Df lightVector = getLight(normalVector[line[i].x], normalVector[line[i+1].x], normalVector[line[i+2].x], light);
         //Transformations
         point3Df wA = perspectiveViewPort(view(A, m));
@@ -145,6 +145,7 @@ void drawFace(char* filename){
     }
     image.flip_vertically();
     image.write_tga_file("output.tga");
+    delete[] zbuffer;
 }
 
 int main(int argc, char **argv){

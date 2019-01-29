@@ -65,14 +65,11 @@ std::vector<point3Df> Lecture::readTexture(char *filename) {
     return tab;
 }
 
-std::vector<std::vector<float> > Lecture::readfile(char *filename) {
+std::vector<vec3Df> Lecture::readfile(char *filename) {
     ifstream fichier(filename, ios::in);
     string line;
-    vector<vector<float> > tab;
-    vector<float> x;
-    vector<float> y;
-    vector<float> z;
-
+    vector<vec3Df> tab;
+    float x,y,z;
     vector<string> line_parts;
     string part;
 
@@ -83,16 +80,14 @@ std::vector<std::vector<float> > Lecture::readfile(char *filename) {
                 while(getline(iss, part, ' ')){
                     line_parts.push_back(part);
                 }
-                x.push_back(strtof((line_parts[1]).c_str(), 0));
-                y.push_back(strtof((line_parts[2]).c_str(), 0));
-                z.push_back(strtof((line_parts[3]).c_str(), 0));
+                x = strtof((line_parts[1]).c_str(), 0);
+                y = strtof((line_parts[2]).c_str(), 0);
+                z = strtof((line_parts[3]).c_str(), 0);
+                tab.push_back(vec3Df(x, y, z));
             }
             line_parts.clear();
         }
         fichier.close();
-        tab.push_back(x);
-        tab.push_back(y);
-        tab.push_back(z);
     } else {
         cerr << "Ouverture du fichier " << filename << "impossible !" << endl;
     }

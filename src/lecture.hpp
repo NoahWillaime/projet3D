@@ -22,7 +22,7 @@ class Lecture {
 public:
     Lecture();
     std::vector<point2D> readline(char *filename);
-    std::vector<std::vector<float> > readfile(char *filename);
+    std::vector<vec3Df> readfile(char *filename);
     std::vector<point3Df> readTexture(char *filename);
     std::vector<vec3Df> readNormal(char *filename);
 };
