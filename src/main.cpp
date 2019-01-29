@@ -12,35 +12,38 @@
 using namespace std;
 const int size = 800;
 const int depth = 255;
-const vec3Df eye = vec3Df(4, 1, 5);
+const vec3Df eye = vec3Df(1, 1, 3);
 const vec3Df up = vec3Df(0, 1, 0);
 
-Matrice viewport(float x, float y, float width, float height){
-    Matrice m3 = Matrice(4, 4);
-    m3.identity();
-    m3.set(3,0,x+width/2.f);
-    m3.set(3,1,y+height/2.f);
-    m3.set(3,2,depth/2.f);
-    m3.set(0, 0, width/2.f);
-    m3.set(1, 1, height/2.f);
-    m3.set(2, 2, depth/2.f);
-    return m3;
+Matrice m1 = Matrice(1, 4);
+Matrice m2 = Matrice(4, 4);
+Matrice vp = Matrice(4, 4);
+Matrice lookat = Matrice(4, 4);
+
+void viewport(float x, float y, float width, float height){
+    vp.identity();
+    vp.set(3,0,x+width/2.f);
+    vp.set(3,1,y+height/2.f);
+    vp.set(3,2,depth/2.f);
+    vp.set(0, 0, width/2.f);
+    vp.set(1, 1, height/2.f);
+    vp.set(2, 2, depth/2.f);
 }
 
 point3Df perspectiveViewPort(point3Df point){
     point3Df cam = {0, 0, eye.z};
-    Matrice m1 = Matrice(1, 3);
+    m1.reset();
     m1.set(0, 0, point.x);
     m1.set(0, 1, point.y);
     m1.set(0, 2, point.z);
-    m1 = m1.augmenter();
-    Matrice m2 = Matrice(3, 3);
+    m1.set(0, 3, 1);
+    m2.reset();
     m2.identity();
-    m2 = m2.augmenter(cam);
+    m2.augmenter(cam);
     m1.multiply(m2);
-    m1 = m1.reduire();
-    m1 = m1.augmenter();
-    m1.multiply(viewport(size/8, size/8, size*3/4, size*3/4));
+    m1.reduire();
+    m1.set(0, 3, 1);
+    m1.multiply(vp);
     point3Df p = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2)};
     return p;
 }
@@ -56,33 +59,32 @@ vec3Df substractM(vec3Df a, vec3Df b){
     return vec3Df(a.x-b.x, a.y-b.y, a.z-b.z);
 }
 
-Matrice setLook(vec3Df center){
+void setLook(vec3Df center){
     vec3Df z = substractM(eye, center);
     z.normalize();
     vec3Df x = crossProduct(up, z);
     x.normalize();
     vec3Df y = crossProduct(z, x);
     y.normalize();
-    Matrice m1 = Matrice(4,4);
-    m1.identity();
-    Matrice m2 = Matrice(4,4);
+    lookat.reset();
+    lookat.identity();
+    m2.reset();
     m2.identity();
     for (int i = 0; i < 3; i++){
-        m1.set(i, 0, x[i]);
-        m1.set(i, 1, y[i]);
-        m1.set(i, 2, z[i]);
+        lookat.set(i, 0, x[i]);
+        lookat.set(i, 1, y[i]);
+        lookat.set(i, 2, z[i]);
         m2.set(3, i, -center[i]);
     }
-    m1.multiply(m2);
-    return m1;
+    lookat.multiply(m2);
 }
 
 point3Df view(vec3Df p, Matrice m){
-    Matrice m1 = Matrice(1, 3);
+    m1.reset();
     m1.set(0, 0, p.x);
     m1.set(0, 1, p.y);
     m1.set(0, 2, p.z);
-    m1 = m1.augmenter();
+    m1.set(0, 3, 1);
     m1.multiply(m);
     point3Df p2 = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2)};
     return p2;
@@ -118,13 +120,15 @@ void drawFace(char* filename){
     vec3Df light = vec3Df(1, -1, 1);
     light.normalize();
     vec3Df center = vec3Df(0, 0, 0);
-    Matrice m = setLook(center);
+    setLook(center);
+    viewport(size/8, size/8, size*3/4, size*3/4);
     int *zbuffer = new int[size * size];
-    for (int i = 0; i < size; i++){
-        for (int j = 0; j < size; j++){
-            zbuffer[i+j*size] = numeric_limits<int>::min();
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            zbuffer[i + j * size] = numeric_limits<int>::min();
         }
     }
+    double time_spent;
     for (int i = 0; i < line.size(); i+=3){
         //Sommets
         vec3Df A = tab[line[i].x];
@@ -132,19 +136,28 @@ void drawFace(char* filename){
         vec3Df C = tab[line[i+2].x];
         point3Df lightVector = getLight(normalVector[line[i].x], normalVector[line[i+1].x], normalVector[line[i+2].x], light);
         //Transformations
-        point3Df wA = perspectiveViewPort(view(A, m));
-        point3Df wB = perspectiveViewPort(view(B, m));
-        point3Df wC = perspectiveViewPort(view(C, m));
+        point3Df wA = perspectiveViewPort(view(A, lookat));
+        point3Df wB = perspectiveViewPort(view(B, lookat));
+        point3Df wC = perspectiveViewPort(view(C, lookat));
         //Couleur des sommets
         point2Df colA = {tabTexture[line[i].y].x, tabTexture[line[i].y].y};
         point2Df colB = {tabTexture[line[i+1].y].x, tabTexture[line[i+1].y].y};
         point2Df colC = {tabTexture[line[i+2].y].x, tabTexture[line[i+2].y].y};
         point2Df pts[3] = {colA, colB, colC};
         point3Df coord[3] = {wA, wB, wC};
+        clock_t begin, end;
+        begin = clock();
         outils.drawTriangle(coord, image, texture, pts, zbuffer, lightVector);
+        end = clock();
+        time_spent += (double)(end - begin) / CLOCKS_PER_SEC;
     }
+    cout << time_spent << endl;
     image.flip_vertically();
     image.write_tga_file("output.tga");
+    m1.delMatrice();
+    m2.delMatrice();
+    vp.delMatrice();
+    lookat.delMatrice();
     delete[] zbuffer;
 }
 
@@ -153,11 +166,7 @@ int main(int argc, char **argv){
     cerr << "./projet3D filename.obj" << endl;
     return -1;
   }
-  clock_t begin, end;
-  double time_spent;
-  begin = clock();
+
   drawFace(argv[1]);
-  end = clock();
-  time_spent = (double)(end - begin) / CLOCKS_PER_SEC;
-  cout << time_spent << endl;
+
 }

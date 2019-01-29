@@ -14,12 +14,12 @@ private:
     float **matrix;
 public:
     Matrice(int width, int height);
-    ~Matrice();
+    delMatrice();
+    void reset();
     void multiply(Matrice mat);
     void identity();
-    Matrice reduire();
-    Matrice augmenter(point3Df camera);
-    Matrice augmenter();
+    void reduire();
+    void augmenter(point3Df camera);
     void set(int x, int y, float p);
     int get_width();
     int get_height();

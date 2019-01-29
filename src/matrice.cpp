@@ -13,10 +13,17 @@ Matrice::Matrice(int width, int height):width(width), height(height) {
     }
 }
 
-Matrice::~Matrice() {
+Matrice::delMatrice() {
     for (int i = 0; i < height; i++)
         delete matrix[i];
     delete[] matrix;
+}
+
+void Matrice::reset() {
+    for (int i = 0; i < height; i++){
+        for (int j = 0; j < width; j++)
+            matrix[i][j] = 0;
+    }
 }
 
 int Matrice::get_width() { return width; }
@@ -38,25 +45,12 @@ void Matrice::set(int x, int y, float p) {
     }
 }
 
-Matrice Matrice::augmenter(point3Df camera) {
-    Matrice nMatrix = Matrice(width+1, height+1);
-    for (int i = 0; i < height; i++){
-        for (int j = 0; j < width; j++)
-            nMatrix.set(j, i, matrix[i][j]);
-    }
-    (camera.x != 0)?nMatrix.set(0, height, -1 / camera.x):nMatrix.set(0, height, 0);
-    (camera.y != 0)?nMatrix.set(1, height, -1 / camera.y):nMatrix.set(1, height, 0);
-    (camera.z != 0)?nMatrix.set(2, height, -1 / camera.z):nMatrix.set(2, height, 0);
-    nMatrix.set(height, 3, 1);
-    return nMatrix;
-}
-
-Matrice Matrice::augmenter() {
-    Matrice nMatrix = Matrice(width, height+1);
-    for (int i = 0; i < height; i++)
-        nMatrix.set(0, i, matrix[i][0]);
-    nMatrix.set(0, height, 1);
-    return nMatrix;
+void Matrice::augmenter(point3Df camera) {
+    if (camera.z != 0)
+        matrix[3][2] = -1 / camera.z;
+    else
+        matrix[3][2] = 0;
+    matrix[3][3] = 1;
 }
 
 void Matrice::multiply(Matrice mat) {
@@ -72,12 +66,10 @@ void Matrice::multiply(Matrice mat) {
     }
 }
 
-Matrice Matrice::reduire() {
-    Matrice nMatrix = Matrice(width, height-1);
-    nMatrix.set(0, 0, matrix[0][0] / matrix[3][0]);
-    nMatrix.set(0, 1, matrix[1][0] / matrix[3][0]);
-    nMatrix.set(0, 2, matrix[2][0] / matrix[3][0]);
-    return nMatrix;
+void Matrice::reduire() {
+    matrix[0][0] /= matrix[3][0];
+    matrix[1][0] /= matrix[3][0];
+    matrix[2][0] /= matrix[3][0];
 }
 
 void Matrice::print() {

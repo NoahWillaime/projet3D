@@ -2,6 +2,7 @@
 // Created by noahd on 14/01/2019.
 //
 
+#include <ctime>
 #include "outils.hpp"
 #include "matrice.h"
 
