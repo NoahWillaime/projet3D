@@ -5,7 +5,8 @@
 #ifndef PROJET3D_MATRICE_H
 #define PROJET3D_MATRICE_H
 
-#include "outils.hpp"
+#include <iostream>
+#include "vec3Df.hpp"
 
 class Matrice {
 private:
@@ -14,7 +15,7 @@ private:
     float **matrix;
 public:
     Matrice(int width, int height);
-    delMatrice();
+    void delMatrice();
     void reset();
     void multiply(Matrice mat);
     void identity();

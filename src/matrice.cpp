@@ -13,9 +13,10 @@ Matrice::Matrice(int width, int height):width(width), height(height) {
     }
 }
 
-Matrice::delMatrice() {
-    for (int i = 0; i < height; i++)
+void Matrice::delMatrice() {
+    for (int i = 0; i < height; i++) {
         delete matrix[i];
+    }
     delete[] matrix;
 }
 
