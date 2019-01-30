@@ -15,13 +15,12 @@ const int depth = 255;
 
 Model *model = NULL;
 
-vec3Df eye = vec3Df(0, 0, 3);
+vec3Df eye = vec3Df(1, 1, 3);
 vec3Df up = vec3Df(0, 1, 0);
 vec3Df light = vec3Df(0, 0, 1);
 vec3Df center = vec3Df(0, 0, 0);
 
 struct GShader : public IShader{
-    point3Df lighting;
     Matrice texturePts = Matrice(3, 2); //Col1 = A, Col2 = B, Col3 = C
 
     virtual vec3Df vertex(int i){
@@ -34,17 +33,14 @@ struct GShader : public IShader{
         texturePts.set(1, 1, model->getTabTexture(indexB.y).y); //B.y
         texturePts.set(2, 0, model->getTabTexture(indexC.y).x); //C.x
         texturePts.set(2, 1, model->getTabTexture(indexC.y).y); //C.y
-        lighting = getLight(model->getNormalVector(model->getLine(i).x), model->getNormalVector(model->getLine(i+1).x), model->getNormalVector(model->getLine(i+2).x), light);
     }
 
-    virtual bool fragment(point3Df barCor, TGAColor &color, point2Df p){
-        vec3Df test = model->getNormalTexture(p.x, p.y);
-        //float intensity = lighting.x * barCor.x + lighting.y * barCor.y + lighting.z * barCor.z;
-        float intensity = test.scalaire(light);
+    virtual bool fragment(point3Df barCor, TGAColor &color){
         point2Df bpoint;
         bpoint.x = texturePts.get(0, 0) * barCor.x + texturePts.get(1, 0) * barCor.y + texturePts.get(2, 0) * barCor.z;
         bpoint.y = texturePts.get(0, 1) * barCor.x + texturePts.get(1, 1) * barCor.y + texturePts.get(2, 1) * barCor.z;
-
+        vec3Df test = model->getNormalTexture(bpoint.x, bpoint.y);
+        float intensity = test.scalaire(light);
         color = model->diffuse(bpoint)*intensity;
         return true;
     }

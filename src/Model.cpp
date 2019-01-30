@@ -26,13 +26,9 @@ int Model::getNbLine() {
 }
 
 vec3Df Model::getNormalTexture(float x, float y) {
-    x /= 800;
-    y /= 800;
-    x *= textureNormal.get_width();
-    y *= textureNormal.get_height();
     vec3Df v;
     TGAColor c;
-    c = textureNormal.get(x, y);
+    c = textureNormal.get(x*textureNormal.get_width(), y*textureNormal.get_width());
     v = vec3Df(c[2], c[1], c[0]);
     v.x /= 127;
     v.y /= 127;

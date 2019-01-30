@@ -14,7 +14,7 @@
 struct IShader {
     //virtual ~IShader();
     virtual vec3Df vertex(int i) = 0;
-    virtual bool fragment(point3Df barCor, TGAColor &color, point2Df p) = 0;
+    virtual bool fragment(point3Df barCor, TGAColor &color) = 0;
 };
 
 
