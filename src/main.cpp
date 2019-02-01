@@ -15,7 +15,7 @@ const int depth = 255;
 
 Model *model = NULL;
 
-vec3Df eye = vec3Df(1, 1, 3);
+vec3Df eye = vec3Df(0, 0, 3);
 vec3Df up = vec3Df(0, 1, 0);
 vec3Df light = vec3Df(0, 0, 1);
 vec3Df center = vec3Df(0, 0, 0);
@@ -51,7 +51,8 @@ void drawFace(){
     point2D indexA, indexB, indexC;
     light.normalize();
     setLook(eye, center, up);
-    viewport(size/8, size/8, size*3/4, size*3/4);
+    get_viewport(size/8, size/8, size*3/4, size*3/4);
+    get_perspective(eye);
     GShader shader;
     int *zbuffer = new int[size * size];
     for (int i = 0; i < size; i++) {
@@ -71,9 +72,11 @@ void drawFace(){
 
         shader.vertex(i);
         //Transformations
-        point3Df wA = perspectiveViewPort(eye, view(A));
-        point3Df wB = perspectiveViewPort(eye, view(B));
-        point3Df wC = perspectiveViewPort(eye, view(C));
+        point3Df wA = viewport(perspective(view(A)));
+        point3Df wB = viewport(perspective(view(B)));
+        point3Df wC = viewport(perspective(view(C)));
+
+
 
         point3Df coord[3] = {wA, wB, wC};
         drawTriangle(coord, image, zbuffer, shader);
@@ -88,6 +91,6 @@ int main(int argc, char **argv){
     cerr << "./projet3D filename.obj" << endl;
     return -1;
   }
-  model = new Model(argv[1]);
+    model = new Model(argv[1]);
   drawFace();
 }

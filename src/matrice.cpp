@@ -73,6 +73,24 @@ void Matrice::reduire() {
     matrix[2][0] /= matrix[3][0];
 }
 
+Matrice Matrice::transpose() {
+    Matrice temp(width, height);
+    for (int i = 0; i < height; i++){
+        for (int j = 0; j < width; j++){
+            temp.set(i, j, matrix[i][j]);
+        }
+    }
+    return temp;
+}
+
+float Matrice::determinant() {
+    float row1, row2, row3;
+    row1 = matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1]);
+    row2 = matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0]);
+    row3 = matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0]);
+    return row1 - row2 + row3;
+}
+
 void Matrice::print() {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++)

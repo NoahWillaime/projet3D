@@ -10,6 +10,7 @@ Matrice m1 = Matrice(1, 4);
 Matrice m2 = Matrice(4, 4);
 Matrice vp = Matrice(4, 4);
 Matrice lookat = Matrice(4, 4);
+Matrice projection = Matrice(4, 4);
 
 vec3Df crossProduct(vec3Df v1, vec3Df v2){
     float x = v1.y * v2.z - v1.z * v2.y;
@@ -39,7 +40,7 @@ point3Df getLight(vec3Df A, vec3Df B, vec3Df C, vec3Df light){
 }
 
 
-void viewport(float x, float y, float width, float height){
+void get_viewport(float x, float y, float width, float height){
     vp.identity();
     vp.set(3,0,x+width/2.f);
     vp.set(3,1,y+height/2.f);
@@ -49,18 +50,29 @@ void viewport(float x, float y, float width, float height){
     vp.set(2, 2, depth/2.f);
 }
 
-point3Df perspectiveViewPort(vec3Df eye, point3Df point){
-    point3Df cam = {0, 0, eye.z};
+void get_perspective(vec3Df eye){
+    projection.identity();
+    projection.set(2, 3, -1/eye.z);
+}
+
+point3Df perspective(point3Df point){
     m1.reset();
     m1.set(0, 0, point.x);
     m1.set(0, 1, point.y);
     m1.set(0, 2, point.z);
     m1.set(0, 3, 1);
-    m2.reset();
-    m2.identity();
-    m2.augmenter(cam);
-    m1.multiply(m2);
+    m1.multiply(projection);
     m1.reduire();
+    m1.set(0, 3, 1);
+    point3Df p = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2)};
+    return p;
+}
+
+point3Df viewport(point3Df point){
+    m1.reset();
+    m1.set(0, 0, point.x);
+    m1.set(0, 1, point.y);
+    m1.set(0, 2, point.z);
     m1.set(0, 3, 1);
     m1.multiply(vp);
     point3Df p = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2)};
@@ -76,15 +88,12 @@ void setLook(vec3Df eye, vec3Df center, vec3Df up){
     y.normalize();
     lookat.reset();
     lookat.identity();
-    m2.reset();
-    m2.identity();
     for (int i = 0; i < 3; i++){
         lookat.set(i, 0, x[i]);
         lookat.set(i, 1, y[i]);
         lookat.set(i, 2, z[i]);
-        m2.set(3, i, -center[i]);
+        lookat.set(3, i, -center[i]);
     }
-    lookat.multiply(m2);
 }
 
 point3Df view(vec3Df p){
@@ -150,7 +159,7 @@ void drawTriangle(point3Df *coords, TGAImage &image, int *zbuffer, IShader &shad
                 z = coords[0].z * b.x + coords[1].z * b.y + coords[2].z * b.z;
                 if (x+y*800 > 0 && zbuffer[int(x+y*800)] < z) {
                     zbuffer[int(x+y*800)] = z;
-                    if (shader.fragment(b, color, p));
+                    if (shader.fragment(b, color));
                         image.set(x, y, color);
                 }
             }
