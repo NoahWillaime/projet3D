@@ -26,7 +26,9 @@ public:
     int get_height();
     float get(int x, int y);
     Matrice transpose();
-    float determinant();
+    Matrice inverse();
+    float determinant4();
+    float determinant3();
     void print();
 };
 

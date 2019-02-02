@@ -83,7 +83,60 @@ Matrice Matrice::transpose() {
     return temp;
 }
 
-float Matrice::determinant() {
+Matrice Matrice::inverse() {
+    Matrice cof(4, 4);
+    Matrice temp(3, 3);
+    float det = determinant4();
+    for (int i = 0; i < 4; i++){
+        for (int j = 0; j < 4; j++){
+            for (int u = 0; u < 3; u++){
+                for (int v = 0; v < 3; v++){
+                    temp.set(v, u, matrix[(u >= i)?(u+1):(u)][(v >= j)?(v+1):(v)]);
+                }
+            }
+            cof.set(j, i, pow(-1, i+j+2)*temp.determinant3());
+        }
+    }
+    Matrice comatrice = cof.transpose();
+    for (int i = 0; i < 4; i++){
+        for (int j = 0; j < 4; j++){
+            comatrice.set(j, i, comatrice.get(j, i)/det);
+        }
+    }
+    cof.delMatrice();
+    temp.delMatrice();
+    return comatrice;
+}
+
+float Matrice::determinant4() {
+    Matrice m1(3, 3);
+    Matrice m2(3, 3);
+    Matrice m3(3, 3);
+    Matrice m4(3, 3);
+    for (int i = 1; i < 4; i++){
+        for (int j = 0; j < 3; j++){
+            if (j >= 0)
+                m1.set(j, i-1, matrix[i][j+1]);
+            if (j >= 1)
+                m2.set(j, i-1, matrix[i][j+1]);
+            else
+                m2.set(j, i-1, matrix[i][j]);
+            if (j >= 2)
+                m3.set(j, i-1, matrix[i][j+1]);
+            else
+                m3.set(j, i-1, matrix[i][j]);
+            m4.set(j, i-1, matrix[i][j]);
+        }
+    }
+    float det = matrix[0][0] * m1.determinant3() - matrix[0][1] * m2.determinant3() + matrix[0][2] * m3.determinant3() - matrix[0][3] * m4.determinant3();
+    m1.delMatrice();
+    m2.delMatrice();
+    m3.delMatrice();
+    m4.delMatrice();
+    return det;
+}
+
+float Matrice::determinant3() {
     float row1, row2, row3;
     row1 = matrix[0][0] * (matrix[1][1] * matrix[2][2] - matrix[1][2] * matrix[2][1]);
     row2 = matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0]);

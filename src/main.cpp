@@ -91,6 +91,28 @@ int main(int argc, char **argv){
     cerr << "./projet3D filename.obj" << endl;
     return -1;
   }
-    model = new Model(argv[1]);
+ /* model = new Model(argv[1]);
   drawFace();
+*/
+    Matrice mat(4, 4);
+    mat.set(0,0,5);
+    mat.set(1,0,4);
+    mat.set(2,0,8);
+    mat.set(3,0,2);
+    mat.set(0,1,7);
+    mat.set(1,1,1);
+    mat.set(2,1,3);
+    mat.set(3,1,6);
+    mat.set(0,2,9);
+    mat.set(1,2,0);
+    mat.set(2,2,2);
+    mat.set(3,2,0);
+    mat.set(0,3,4);
+    mat.set(1,3,7);
+    mat.set(2,3,5);
+    mat.set(3,3,3);
+    mat.print();
+    cout << endl;
+    mat.inverse().print();
+    mat.delMatrice();
 }
