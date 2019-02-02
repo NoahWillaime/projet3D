@@ -32,6 +32,8 @@ public:
     void normalize();
     float operator[](const int i);
     float scalaire(vec3Df v);
+    vec3Df mult(float num);
+    vec3Df soustraction(vec3Df v);
 };
 
 

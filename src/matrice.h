@@ -17,6 +17,7 @@ public:
     Matrice(int width, int height);
     void delMatrice();
     void reset();
+    Matrice multiplyCarre(Matrice mat);
     void multiply(Matrice mat);
     void identity();
     void reduire();
@@ -29,6 +30,7 @@ public:
     Matrice inverse();
     float determinant4();
     float determinant3();
+    Matrice copy();
     void print();
 };
 

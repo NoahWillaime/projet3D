@@ -67,6 +67,18 @@ void Matrice::multiply(Matrice mat) {
     }
 }
 
+Matrice Matrice::multiplyCarre(Matrice mat) {
+    Matrice res(width, width);
+    float sum;
+    for (int i = 0; i < width; i++){
+        for (int j = 0; j < width; j++){
+            sum = matrix[i][0] * mat.get(j,0) + matrix[i][1] * mat.get(j,1) + matrix[i][2] * mat.get(j,2) + matrix[i][3] * mat.get(j,3);
+            res.set(j, i, sum);
+        }
+    }
+    return res;
+}
+
 void Matrice::reduire() {
     matrix[0][0] /= matrix[3][0];
     matrix[1][0] /= matrix[3][0];
@@ -142,6 +154,15 @@ float Matrice::determinant3() {
     row2 = matrix[0][1] * (matrix[1][0] * matrix[2][2] - matrix[1][2] * matrix[2][0]);
     row3 = matrix[0][2] * (matrix[1][0] * matrix[2][1] - matrix[1][1] * matrix[2][0]);
     return row1 - row2 + row3;
+}
+
+Matrice Matrice::copy() {
+    Matrice cop(width, height);
+    for (int i = 0; i < height; i++){
+        for (int j = 0; j < width; j++)
+            cop.set(j , i, matrix[i][j]);
+    }
+    return cop;
 }
 
 void Matrice::print() {

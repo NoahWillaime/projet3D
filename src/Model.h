@@ -20,6 +20,7 @@ class Model {
 private:
     TGAImage texture;
     TGAImage textureNormal;
+    TGAImage textureSpec;
     char *filename;
     std::vector<vec3Df> tab;
     std::vector<point2D> line;
@@ -39,6 +40,7 @@ public:
     vec3Df getNormalVector(int i);
     int getNbLine();
     TGAColor diffuse(point2Df textureCord);
+    float specular(point2Df specCord);
 };
 
 #endif //PROJET3D_MODEL_H

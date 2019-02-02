@@ -24,6 +24,14 @@ float vec3Df::scalaire(vec3Df v) {
     return (norm * v.norm * cos);
 }
 
+vec3Df vec3Df::mult(float num) {
+    return vec3Df(x*num, y*num, z*num);
+}
+
+vec3Df vec3Df::soustraction(vec3Df v) {
+    return vec3Df(x-v.x, y-v.y,z-v.z);
+}
+
 float vec3Df::operator[](const int i) {
     if (i == 0)
         return x;

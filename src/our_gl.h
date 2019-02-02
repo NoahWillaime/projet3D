@@ -11,6 +11,9 @@
 #include "matrice.h"
 #include "tgaimage.h"
 
+extern Matrice lookat;
+extern Matrice projection;
+
 struct IShader {
     //virtual ~IShader();
     virtual vec3Df vertex(int i) = 0;

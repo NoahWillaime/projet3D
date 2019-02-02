@@ -11,10 +11,16 @@ Model::Model(char *fn) : filename(fn){
     texture.flip_vertically();    readfile();
     textureNormal.read_tga_file("../obj/head_nm.tga");
     textureNormal.flip_vertically();
+    textureSpec.read_tga_file("../obj/head_spec.tga");
+    textureSpec.flip_vertically();
     readfile();
     readline();
     readTexture();
     readNormal();
+}
+
+float Model::specular(point2Df specCord) {
+    return textureSpec.get(specCord.x*textureSpec.get_width(), specCord.y*textureSpec.get_width())[0];
 }
 
 TGAColor Model::diffuse(point2Df textureCord) {
