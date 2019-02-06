@@ -20,6 +20,17 @@ struct point3Df{
     float x;
     float y;
     float z;
+
+    point3Df():x(0), y(0), z(0){}
+
+    point3Df(float cx, float cy, float cz) : x(cx), y(cy), z(cz){}
+
+    point3Df operator/(const float d){
+        x/=d;
+        y/=d;
+        z/=d;
+        return point3Df(x, y, z);
+    }
 };
 class vec3Df {
 public:

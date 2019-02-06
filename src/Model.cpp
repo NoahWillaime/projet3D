@@ -7,11 +7,21 @@
 using namespace std;
 
 Model::Model(char *fn) : filename(fn){
-    texture.read_tga_file("../obj/head_diffuse.tga");
+    std::stringstream ss, ss2, ss3;
+    ss << "../obj/" << filename << "_diffuse.tga";
+    ss2 << "../obj/" << filename << "_nm.tga";
+    ss3 << "../obj/" << filename << "_spec.tga";
+    std::string s = ss.str();
+    cout << s << endl;
+    texture.read_tga_file(s.c_str());
     texture.flip_vertically();    readfile();
-    textureNormal.read_tga_file("../obj/head_nm.tga");
+    s = ss2.str();
+    cout << s << endl;
+    textureNormal.read_tga_file(s.c_str());
     textureNormal.flip_vertically();
-    textureSpec.read_tga_file("../obj/head_spec.tga");
+    s = ss3.str();
+    cout << s << endl;
+    textureSpec.read_tga_file(s.c_str());
     textureSpec.flip_vertically();
     readfile();
     readline();
@@ -54,8 +64,10 @@ vec3Df Model::getTab(int i) { return tab[i]; }
 point3Df Model::getTabTexture(int i) { return tabTexture[i]; }
 
 void Model::readNormal() {
-    ifstream fichier(filename, ios::in);
-    string line;
+    std::stringstream ss;
+    ss << "../obj/" << filename << ".obj";
+    std::string s = ss.str();
+    ifstream fichier(s, ios::in);    string line;
     vector<string> line_parts;
     string part;
     float x,y,z;
@@ -80,7 +92,10 @@ void Model::readNormal() {
 }
 
 void Model::readTexture() {
-    ifstream fichier(filename, ios::in);
+    std::stringstream ss;
+    ss << "../obj/" << filename << ".obj";
+    std::string s = ss.str();
+    ifstream fichier(s, ios::in);
     string line;
     vector<string> line_parts;
     string part;
@@ -108,7 +123,10 @@ void Model::readTexture() {
 
 
 void Model::readfile(){
-    ifstream fichier(filename, ios::in);
+    std::stringstream ss;
+    ss << "../obj/" << filename << ".obj";
+    std::string s = ss.str();
+    ifstream fichier(s, ios::in);
     string line;
     float x, y, z;
     vector<string> line_parts;
@@ -135,8 +153,10 @@ void Model::readfile(){
 }
 
 void Model::readline() {
-    ifstream fichier(filename, ios::in);
-    string line;
+    std::stringstream ss;
+    ss << "../obj/" << filename << ".obj";
+    std::string s = ss.str();
+    ifstream fichier(s, ios::in);    string line;
     string part;
     string parts;
     int p1;

@@ -41,6 +41,7 @@ point3Df getLight(vec3Df A, vec3Df B, vec3Df C, vec3Df light){
 
 
 void get_viewport(float x, float y, float width, float height){
+    vp.reset();
     vp.identity();
     vp.set(3,0,x+width/2.f);
     vp.set(3,1,y+height/2.f);
@@ -51,8 +52,12 @@ void get_viewport(float x, float y, float width, float height){
 }
 
 void get_perspective(vec3Df eye){
+    projection.reset();
     projection.identity();
-    projection.set(2, 3, -1/eye.z);
+    if (eye.z != 0)
+        projection.set(2, 3, -1/eye.z);
+    else
+        projection.set(2, 3, 0);
 }
 
 point3Df perspective(point3Df point){
@@ -68,14 +73,14 @@ point3Df perspective(point3Df point){
     return p;
 }
 
-point3Df viewport(point3Df point){
+vec3Df viewport(point3Df point){
     m1.reset();
     m1.set(0, 0, point.x);
     m1.set(0, 1, point.y);
     m1.set(0, 2, point.z);
     m1.set(0, 3, 1);
     m1.multiply(vp);
-    point3Df p = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2)};
+    vec3Df p = vec3Df(m1.get(0, 0), m1.get(0, 1), m1.get(0, 2));
     return p;
 }
 
@@ -125,7 +130,7 @@ float getMax(float *param) {
     return max;
 }
 
-std::vector<point2Df> boundingBox(point3Df A, point3Df B, point3Df C) {
+std::vector<point2Df> boundingBox(vec3Df A, vec3Df B, vec3Df C) {
     float pointX[] = {A.x, B.x, C.x};
     float pointY[] = {A.y, B.y, C.y};
     std::vector<point2Df> boundingBox;
@@ -136,7 +141,7 @@ std::vector<point2Df> boundingBox(point3Df A, point3Df B, point3Df C) {
     return boundingBox;
 }
 
-point3Df barycentric(point2Df p, point3Df A, point3Df B, point3Df C){
+point3Df barycentric(point2Df p, vec3Df A, vec3Df B, vec3Df C){
     float div = A.x*B.y + B.x*C.y + C.x*A.y - A.y*B.x - B.y*C.x - C.y*A.x;
     float p1 = (p.x*B.y + B.x*C.y + C.x*p.y - p.y*B.x - B.y*C.x - C.y*p.x) / div;
     float p2 = (A.x*p.y + p.x*C.y + C.x*A.y - A.y*p.x - p.y*C.x - C.y*A.x) / div;
@@ -145,7 +150,7 @@ point3Df barycentric(point2Df p, point3Df A, point3Df B, point3Df C){
     return b;
 }
 
-void drawTriangle(point3Df *coords, TGAImage &image, int *zbuffer, IShader &shader) {
+void drawTriangle(vec3Df *coords, TGAImage &image, int *zbuffer, IShader &shader) {
     std::vector<point2Df> bBox = boundingBox(coords[0], coords[1], coords[2]);
     int z = 0;
     TGAColor color;

@@ -11,23 +11,24 @@
 #include "matrice.h"
 #include "tgaimage.h"
 
+extern Matrice vp;
 extern Matrice lookat;
 extern Matrice projection;
 
 struct IShader {
     //virtual ~IShader();
-    virtual vec3Df vertex(int i) = 0;
+    virtual vec3Df vertex(int i, int j) = 0;
     virtual bool fragment(point3Df barCor, TGAColor &color) = 0;
 };
 
 
 void get_viewport(float x, float y, float width, float height);
 void get_perspective(vec3Df eye);
-point3Df viewport(point3Df point);
+vec3Df viewport(point3Df point);
 point3Df perspective(point3Df point);
 void setLook(vec3Df eye, vec3Df center, vec3Df up);
 point3Df view(vec3Df p);
 point3Df getLight(vec3Df A, vec3Df B, vec3Df C, vec3Df light);
-void drawTriangle(point3Df *coords, TGAImage &image, int *zbuffer, IShader &shader);
+void drawTriangle(vec3Df *coords, TGAImage &image, int *zbuffer, IShader &shader);
 
 #endif //PROJET3D_OUR_GL_H
