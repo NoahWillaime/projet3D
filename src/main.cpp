@@ -18,7 +18,7 @@ int *shadowbuffer = new int[size * size];
 
 vec3Df eye = vec3Df(0, 0, 3);
 vec3Df up = vec3Df(0, 1, 0);
-vec3Df light = vec3Df(1,0, 0);
+vec3Df light = vec3Df(0,0, 1);
 vec3Df center = vec3Df(0, 0, 0);
 
 struct DepthShader : public IShader{
@@ -80,7 +80,7 @@ struct GShader : public IShader{
     }
 
     virtual bool fragment(point3Df barCor, TGAColor &color){
-        Matrice A = Matrice(3, 3);
+        /*Matrice A = Matrice(3, 3);
         A.set(0, 0, norm_tri.get(1, 0) - norm_tri.get(0, 0));
         A.set(0, 1, norm_tri.get(1, 1) - norm_tri.get(0, 1));
         A.set(0, 2, norm_tri.get(1, 2) - norm_tri.get(0, 2));
@@ -123,7 +123,7 @@ struct GShader : public IShader{
 
         vec3Df n = vec3Df(B.get(0, 0) * test.x + B.get(1, 0) * test.y + B.get(2, 0) * test.z, B.get(0, 1) * test.x + B.get(1, 1) * test.y + B.get(2, 1) * test.z, B.get(0, 2) * test.x + B.get(1, 2) * test.y + B.get(2, 2) * test.z);
         n.normalize();
-        /*
+        */
         Matrice m = Matrice(1, 4);
         m.set(0, 0, varying.get(0, 0)  * barCor.x + varying.get(1, 0) * barCor.y + varying.get(2, 0) * barCor.z);
         m.set(0, 1, varying.get(0, 1)  * barCor.x + varying.get(1, 1) * barCor.y + varying.get(2, 1) * barCor.z);
@@ -154,9 +154,9 @@ struct GShader : public IShader{
         vec3Df r = v1.mult(v1.scalaire(v2) * 2.f);
         r.soustraction(v2);
         r.normalize();
-        float spec = pow(max(r.z, 0.0f), model->specular(bpoint)+100);*/
-//        float diff = max(0.f, v1.scalaire(v2));
-        float diff = max(0.f, n.scalaire(light));
+        float spec = pow(max(r.z, 0.0f), model->specular(bpoint)+100);
+        float diff = max(0.f, v1.scalaire(v2));
+//        float diff = max(0.f, n.scalaire(light));
         TGAColor c = model->diffuse(bpoint);
         color = c;
         for (int i = 0; i < 3; i++){
