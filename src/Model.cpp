@@ -9,7 +9,7 @@ using namespace std;
 Model::Model(char *fn) : filename(fn){
     std::stringstream ss, ss2, ss3;
     ss << "../obj/" << filename << "_diffuse.tga";
-    ss2 << "../obj/" << filename << "_nm.tga";
+    ss2 << "../obj/" << filename << "_nm_tangent.tga";
     ss3 << "../obj/" << filename << "_spec.tga";
     std::string s = ss.str();
     cout << s << endl;

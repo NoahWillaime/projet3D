@@ -28,6 +28,7 @@ public:
     float get(int x, int y);
     Matrice transpose();
     Matrice inverse();
+    Matrice inverse3();
     float determinant4();
     float determinant3();
     Matrice copy();

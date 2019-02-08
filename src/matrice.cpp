@@ -95,6 +95,31 @@ Matrice Matrice::transpose() {
     return temp;
 }
 
+Matrice Matrice::inverse3(){
+    Matrice cof(3, 3);
+    Matrice temp(2, 2);
+    float det = determinant3();
+    for (int i = 0; i < 3; i++){
+        for (int j = 0; j < 3; j++){
+            for (int u = 0; u < 2; u++){
+                for (int v = 0; v < 2; v++){
+                    temp.set(v, u, matrix[(u >= i)?(u+1):(u)][(v >= j)?(v+1):(v)]);
+                }
+            }
+            cof.set(j, i, pow(-1, i+j+2)*(temp.get(0,0)*temp.get(1, 1) - temp.get(1, 0) * temp.get(0, 1)));
+        }
+    }
+    Matrice comatrice = cof.transpose();
+    for (int i = 0; i < 3; i++){
+        for (int j = 0; j < 3; j++){
+            comatrice.set(j, i, comatrice.get(j, i)/det);
+        }
+    }
+    cof.delMatrice();
+    temp.delMatrice();
+    return comatrice;
+}
+
 Matrice Matrice::inverse() {
     Matrice cof(4, 4);
     Matrice temp(3, 3);

@@ -52,6 +52,8 @@ struct GShader : public IShader{
     Matrice temp = Matrice(1, 4);
     Matrice l = Matrice(1,4);
     Matrice varying = Matrice(3, 3);
+    Matrice norm_tri = Matrice(3, 3);
+    Matrice varying_norm = Matrice(3, 3);
 
     virtual vec3Df vertex(int i, int j){
         point2D index = model->getLine(i+j);
@@ -61,10 +63,67 @@ struct GShader : public IShader{
         varying.set(j, 0, p.x);
         varying.set(j, 1, p.y);
         varying.set(j, 2, p.z);
+        norm_tri.set(j, 0, p.x/1);
+        norm_tri.set(j, 1, p.y/1);
+        norm_tri.set(j, 2, p.z/1);
+        vec3Df vn = model->getNormalVector(index.x);
+        Matrice m = Matrice(1, 4);
+        m.set(0,0,vn.x);
+        m.set(0,1,vn.y);
+        m.set(0,2,vn.z);
+        m.set(0,3,0.f);
+        m.multiply(MIT);
+        varying_norm.set(j, 0, m.get(0,0));
+        varying_norm.set(j, 1, m.get(0,1));
+        varying_norm.set(j, 2, m.get(0,2));
         return p;
     }
 
     virtual bool fragment(point3Df barCor, TGAColor &color){
+        Matrice A = Matrice(3, 3);
+        A.set(0, 0, norm_tri.get(1, 0) - norm_tri.get(0, 0));
+        A.set(0, 1, norm_tri.get(1, 1) - norm_tri.get(0, 1));
+        A.set(0, 2, norm_tri.get(1, 2) - norm_tri.get(0, 2));
+        A.set(1, 0, norm_tri.get(0, 0) - norm_tri.get(2, 0));
+        A.set(1, 1, norm_tri.get(0, 1) - norm_tri.get(2, 1));
+        A.set(1, 2, norm_tri.get(0, 2) - norm_tri.get(2, 2));
+        vec3Df bn;
+        bn.x = varying_norm.get(0,0) * barCor.x + varying_norm.get(1, 0) * barCor.y + varying_norm.get(2, 0) * barCor.z;
+        bn.y = varying_norm.get(0,1) * barCor.x + varying_norm.get(1, 1) * barCor.y + varying_norm.get(2, 1) * barCor.z;
+        bn.z = varying_norm.get(0,2) * barCor.x + varying_norm.get(1, 2) * barCor.y + varying_norm.get(2, 2) * barCor.z;
+        bn.normalize();
+        A.set(2, 0, bn.x);
+        A.set(2, 1, bn.y);
+        A.set(2, 2, bn.z);
+        Matrice AI = A.inverse3();
+
+        vec3Df ti = vec3Df(texturePts.get(1, 0) - texturePts.get(0, 0), texturePts.get(1, 1) - texturePts.get(0, 1), 0);
+        vec3Df tj = vec3Df(texturePts.get(2, 0) - texturePts.get(0, 0), texturePts.get(2, 1) - texturePts.get(0, 1), 0);
+
+        vec3Df i = vec3Df(AI.get(0, 0) * ti.x + AI.get(1, 0) * ti.y + AI.get(2, 0) * ti.z, AI.get(0, 1) * ti.x + AI.get(1, 1) * ti.y + AI.get(2, 1) * ti.z, AI.get(0, 2) * ti.x + AI.get(1, 2) * ti.y + AI.get(2, 2) * ti.z);
+        vec3Df j = vec3Df(AI.get(0, 0) * tj.x + AI.get(1, 0) * tj.y + AI.get(2, 0) * tj.z, AI.get(0, 1) * tj.x + AI.get(1, 1) * tj.y + AI.get(2, 1) * tj.z, AI.get(0, 2) * tj.x + AI.get(1, 2) * tj.y + AI.get(2, 2) * tj.z);
+
+        Matrice B = Matrice(3, 3);
+        i.normalize();
+        j.normalize();
+        B.set(0,0,i.x);
+        B.set(0,1,i.y);
+        B.set(0,2,i.z);
+        B.set(0,0,j.x);
+        B.set(0,1,j.y);
+        B.set(0,2,j.z);
+        B.set(0,0,bn.x);
+        B.set(0,1,bn.y);
+        B.set(0,2,bn.z);
+
+        point2Df bpoint;
+        bpoint.x = texturePts.get(0, 0) * barCor.x + texturePts.get(1, 0) * barCor.y + texturePts.get(2, 0) * barCor.z;
+        bpoint.y = texturePts.get(0, 1) * barCor.x + texturePts.get(1, 1) * barCor.y + texturePts.get(2, 1) * barCor.z;
+        vec3Df test = model->getNormalTexture(bpoint.x, bpoint.y);
+
+        vec3Df n = vec3Df(B.get(0, 0) * test.x + B.get(1, 0) * test.y + B.get(2, 0) * test.z, B.get(0, 1) * test.x + B.get(1, 1) * test.y + B.get(2, 1) * test.z, B.get(0, 2) * test.x + B.get(1, 2) * test.y + B.get(2, 2) * test.z);
+        n.normalize();
+        /*
         Matrice m = Matrice(1, 4);
         m.set(0, 0, varying.get(0, 0)  * barCor.x + varying.get(1, 0) * barCor.y + varying.get(2, 0) * barCor.z);
         m.set(0, 1, varying.get(0, 1)  * barCor.x + varying.get(1, 1) * barCor.y + varying.get(2, 1) * barCor.z);
@@ -95,12 +154,14 @@ struct GShader : public IShader{
         vec3Df r = v1.mult(v1.scalaire(v2) * 2.f);
         r.soustraction(v2);
         r.normalize();
-        float spec = pow(max(r.z, 0.0f), model->specular(bpoint)+100);
-        float diff = max(0.f, v1.scalaire(v2));
+        float spec = pow(max(r.z, 0.0f), model->specular(bpoint)+100);*/
+//        float diff = max(0.f, v1.scalaire(v2));
+        float diff = max(0.f, n.scalaire(light));
         TGAColor c = model->diffuse(bpoint);
         color = c;
         for (int i = 0; i < 3; i++){
-            color[i] = min<float>(5 + c[i]*(diff+2*spec), 255);
+        //    color[i] = min<float>(5 + c[i]*(diff+2*spec), 255);
+            color[i] = c[i] *diff;
         }
         return true;
     }
@@ -160,5 +221,6 @@ int main(int argc, char **argv){
     }
     model = new Model(argv[1]);
     drawFace();
+
 
 }
