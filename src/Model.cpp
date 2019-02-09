@@ -9,7 +9,7 @@ using namespace std;
 Model::Model(char *fn) : filename(fn){
     std::stringstream ss, ss2, ss3;
     ss << "../obj/" << filename << "_diffuse.tga";
-    ss2 << "../obj/" << filename << "_nm.tga";
+    ss2 << "../obj/" << filename << "_nm_tangent.tga";
     ss3 << "../obj/" << filename << "_spec.tga";
     std::string s = ss.str();
     cout << s << endl;
@@ -46,12 +46,9 @@ vec3Df Model::getNormalTexture(float x, float y) {
     TGAColor c;
     c = textureNormal.get(x*textureNormal.get_width(), y*textureNormal.get_width());
     v = vec3Df(c[2], c[1], c[0]);
-    v.x /= 127;
-    v.y /= 127;
-    v.z /= 127;
-    v.x -= 1;
-    v.y -= 1;
-    v.z -= 1;
+    v.x = v.x/255.f*2.f - 1.f;
+    v.y = v.y/255.f*2.f - 1.f;
+    v.z = v.z/255.f*2.f - 1.f;
     return v;
 }
 

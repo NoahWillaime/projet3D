@@ -46,14 +46,6 @@ void Matrice::set(int x, int y, float p) {
     }
 }
 
-void Matrice::augmenter(point3Df camera) {
-    if (camera.z != 0)
-        matrix[3][2] = -1 / camera.z;
-    else
-        matrix[3][2] = 0;
-    matrix[3][3] = 1;
-}
-
 void Matrice::multiply(Matrice mat) {
     if (height == mat.get_width()){
         float result;
@@ -188,6 +180,22 @@ Matrice Matrice::copy() {
             cop.set(j , i, matrix[i][j]);
     }
     return cop;
+}
+
+void Matrice::setRow(int row, vec3Df v) {
+    matrix[row][0] = v.x;
+    matrix[row][1] = v.y;
+    matrix[row][2] = v.z;
+}
+
+void Matrice::setCol(int col, vec3Df v) {
+    matrix[0][col] = v.x;
+    matrix[1][col] = v.y;
+    matrix[2][col] = v.z;
+}
+
+vec3Df Matrice::getCol3Df(int col) {
+    return vec3Df(matrix[0][col], matrix[1][col], matrix[2][col]);
 }
 
 void Matrice::print() {

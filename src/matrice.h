@@ -21,7 +21,9 @@ public:
     void multiply(Matrice mat);
     void identity();
     void reduire();
-    void augmenter(point3Df camera);
+    void setRow(int row, vec3Df v);
+    void setCol(int col, vec3Df v);
+    vec3Df getCol3Df(int col);
     void set(int x, int y, float p);
     int get_width();
     int get_height();

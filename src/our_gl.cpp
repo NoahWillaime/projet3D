@@ -60,7 +60,7 @@ void get_perspective(vec3Df eye){
         projection.set(2, 3, 0);
 }
 
-point3Df perspective(point3Df point){
+point4Df perspective(point3Df point){
     m1.reset();
     m1.set(0, 0, point.x);
     m1.set(0, 1, point.y);
@@ -68,12 +68,11 @@ point3Df perspective(point3Df point){
     m1.set(0, 3, 1);
     m1.multiply(projection);
     m1.reduire();
-    m1.set(0, 3, 1);
-    point3Df p = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2)};
+    point4Df p = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2), m1.get(0, 3)};
     return p;
 }
 
-vec3Df viewport(point3Df point){
+vec3Df viewport(vec3Df point){
     m1.reset();
     m1.set(0, 0, point.x);
     m1.set(0, 1, point.y);

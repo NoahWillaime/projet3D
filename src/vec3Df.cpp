@@ -28,8 +28,15 @@ vec3Df vec3Df::mult(float num) {
     return vec3Df(x*num, y*num, z*num);
 }
 
-vec3Df vec3Df::soustraction(vec3Df v) {
-    return vec3Df(x-v.x, y-v.y,z-v.z);
+vec3Df vec3Df::operator-(const vec3Df v) {
+    return vec3Df(x-v.x, y-v.y, z-v.z);
+}
+
+float vec3Df::operator*(const vec3Df v) {
+    float res = x * v.x;
+    res += y * v.y;
+    res += z * v.z;
+    return res;
 }
 
 float vec3Df::operator[](const int i) {

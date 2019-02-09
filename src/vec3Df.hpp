@@ -32,6 +32,19 @@ struct point3Df{
         return point3Df(x, y, z);
     }
 };
+
+struct point4Df{
+    float x;
+    float y;
+    float z;
+    float w;
+
+    point4Df():x(0),y(0),z(0),w(0){}
+
+    point4Df(float cx, float cy, float cz, float cw):x(cx),y(cy),z(cz),w(cw){}
+
+};
+
 class vec3Df {
 public:
     float x;
@@ -42,6 +55,8 @@ public:
     vec3Df(float x1, float y1, float z1);
     void normalize();
     float operator[](const int i);
+    vec3Df operator-(const vec3Df v);
+    float operator*(const vec3Df v);
     float scalaire(vec3Df v);
     vec3Df mult(float num);
     vec3Df soustraction(vec3Df v);
