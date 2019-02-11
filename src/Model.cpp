@@ -30,7 +30,7 @@ Model::Model(char *fn) : filename(fn){
 }
 
 float Model::specular(point2Df specCord) {
-    return textureSpec.get(specCord.x*textureSpec.get_width(), specCord.y*textureSpec.get_width())[0];
+    return textureSpec.get(specCord.x*textureSpec.get_width(), specCord.y*textureSpec.get_width())[0]/1.f;
 }
 
 TGAColor Model::diffuse(point2Df textureCord) {

@@ -16,7 +16,7 @@ const int depth = 255;
 Model *model = NULL;
 int *shadowbuffer = new int[size * size];
 
-vec3Df eye = vec3Df(1, 1, 3);
+vec3Df eye = vec3Df(0, 0, 3);
 vec3Df up = vec3Df(0, 1, 0);
 vec3Df light = vec3Df(1,1, 1);
 vec3Df center = vec3Df(0, 0, 0);
@@ -50,21 +50,14 @@ struct GShader : public IShader{
     Matrice MIT = Matrice(4, 4);
     Matrice M = Matrice(4, 4);
     Matrice M_Shadow = Matrice(4, 4);
-    Matrice temp = Matrice(1, 4);
-    Matrice l = Matrice(1,4);
-    Matrice varying = Matrice(3, 3);
     Matrice norm_tri = Matrice(3, 3);
     Matrice varying_norm = Matrice(3, 3);
 
     virtual vec3Df vertex(int i, int j){
         point2D index = model->getLine(i+j);
-        texturePts.set(j, 0, model->getTabTexture(index.y).x); //A.x
-        texturePts.set(j, 1, model->getTabTexture(index.y).y); //A.y
+        texturePts.set(j, 0, model->getTabTexture(index.y).x);
+        texturePts.set(j, 1, model->getTabTexture(index.y).y);
         point4Df p = perspective(view(model->getTab(index.x)));
-        point4Df p2 = perspective(view(model->getTab(index.x)));
-        varying.set(j, 0, p.x);
-        varying.set(j, 1, p.y);
-        varying.set(j, 2, p.z);
         norm_tri.set(j, 0, p.x/p.w);
         norm_tri.set(j, 1, p.y/p.w);
         norm_tri.set(j, 2, p.z/p.w);
@@ -79,29 +72,7 @@ struct GShader : public IShader{
         varying_norm.set(j, 0, m.get(0,0));
         varying_norm.set(j, 1, m.get(0,1));
         varying_norm.set(j, 2, m.get(0,2));
-        //VARYING OK !!
-        if (j == 2){
-            Matrice A = Matrice(3, 3);
-            A.set(0, 0, norm_tri.get(1, 0) - norm_tri.get(0, 0));
-            A.set(1, 0, norm_tri.get(1, 1) - norm_tri.get(0, 1));
-            A.set(2, 0, norm_tri.get(1, 2) - norm_tri.get(0, 2));
-            A.set(0, 1, norm_tri.get(2, 0) - norm_tri.get(0, 0));
-            A.set(1, 1, norm_tri.get(2, 1) - norm_tri.get(0, 1));
-            A.set(2, 1, norm_tri.get(2, 2) - norm_tri.get(0, 2));
-            vec3Df bn;
-            vec3Df barCor(1,1,1);
-            bn.x = varying_norm.get(0,0) * barCor.x + varying_norm.get(1, 0) * barCor.y + varying_norm.get(2, 0) * barCor.z;
-            bn.y = varying_norm.get(0,1) * barCor.x + varying_norm.get(1, 1) * barCor.y + varying_norm.get(2, 1) * barCor.z;
-            bn.z = varying_norm.get(0,2) * barCor.x + varying_norm.get(1, 2) * barCor.y + varying_norm.get(2, 2) * barCor.z;
-
-           // bn.normalize();
-            cout << bn.x << "/"<<bn.y<<"/"<<bn.z<<endl;
-            A.setRow(2, bn);
-//            A.print();
-            //cout << norm_tri.get(0, 1) - norm_tri.get(0, 0) << endl;
-            cout << "===" <<endl;
-        }
-        return vec3Df(p.x, p.y,p.z);
+        return vec3Df(p.x/p.w, p.y/p.w,p.z/p.w);
     }
 
     virtual bool fragment(point3Df barCor, TGAColor &color){
@@ -116,15 +87,11 @@ struct GShader : public IShader{
         bn.x = varying_norm.get(0,0) * barCor.x + varying_norm.get(1, 0) * barCor.y + varying_norm.get(2, 0) * barCor.z;
         bn.y = varying_norm.get(0,1) * barCor.x + varying_norm.get(1, 1) * barCor.y + varying_norm.get(2, 1) * barCor.z;
         bn.z = varying_norm.get(0,2) * barCor.x + varying_norm.get(1, 2) * barCor.y + varying_norm.get(2, 2) * barCor.z;
-
         bn.normalize();
-
         A.setRow(2, bn);
         Matrice AI = A.inverse3();
-
-        vec3Df ti = vec3Df(texturePts.get(1, 0) - texturePts.get(0, 0), texturePts.get(2, 0) - texturePts.get(0, 0), 0.f); //OK
-        vec3Df tj = vec3Df(texturePts.get(1, 1) - texturePts.get(0, 1), texturePts.get(2, 1) - texturePts.get(0, 1), 0.f); //OK
-
+        vec3Df ti = vec3Df(texturePts.get(1, 0) - texturePts.get(0, 0), texturePts.get(2, 0) - texturePts.get(0, 0), 0.f);
+        vec3Df tj = vec3Df(texturePts.get(1, 1) - texturePts.get(0, 1), texturePts.get(2, 1) - texturePts.get(0, 1), 0.f);
         Matrice mi = Matrice(1, 3);
         mi.setCol(0, ti);
         mi = mi.multiply(AI);
@@ -150,51 +117,16 @@ struct GShader : public IShader{
         t = t.multiply(B);
         vec3Df n = vec3Df(t.get(0, 0), t.get(0, 1), t.get(0, 2));
         n.normalize();
-        /*
-        Matrice m = Matrice(1, 4);
-        m.set(0, 0, varying.get(0, 0)  * barCor.x + varying.get(1, 0) * barCor.y + varying.get(2, 0) * barCor.z);
-        m.set(0, 1, varying.get(0, 1)  * barCor.x + varying.get(1, 1) * barCor.y + varying.get(2, 1) * barCor.z);
-        m.set(0, 2, varying.get(0, 2)  * barCor.x + varying.get(1, 2) * barCor.y + varying.get(2, 2) * barCor.z);
-        m.set(0, 3, 1);
-        m.multiply(M_Shadow);
-        vec3Df v(m.get(0, 0) / m.get(0, 3), m.get(0, 1) / m.get(0, 3), m.get(0, 2) / m.get(0, 3));
-        int index = int(v[0]) + int(v[1]) * size;
-        float shadow = .3 + .7*(shadowbuffer[index] < v[2]+43.34);
-        point2Df bpoint;
-        bpoint.x = texturePts.get(0, 0) * barCor.x + texturePts.get(1, 0) * barCor.y + texturePts.get(2, 0) * barCor.z;
-        bpoint.y = texturePts.get(0, 1) * barCor.x + texturePts.get(1, 1) * barCor.y + texturePts.get(2, 1) * barCor.z;
-        vec3Df test = model->getNormalTexture(bpoint.x, bpoint.y);
-        temp.set(0, 0, test.x);
-        temp.set(0, 1, test.y);
-        temp.set(0, 2, test.z);
-        temp.set(0, 3, 0);
-        l.set(0, 0, light.x);
-        l.set(0, 1, light.y);
-        l.set(0, 2, light.z);
-        l.set(0, 3, 1);
-        temp.multiply(MIT);
-        l.multiply(M);
-        vec3Df v1 = vec3Df(temp.get(0, 0), temp.get(0, 1), temp.get(0, 2));
-        vec3Df v2 = vec3Df(l.get(0, 0), l.get(0, 1), l.get(0, 2));
-        v1.normalize();
-        v2.normalize();
-        vec3Df r = v1.mult(v1.scalaire(v2) * 2.f);
-        r.soustraction(v2);
+        vec3Df r = n.mult(n.scalaire(light) * 2.f);
+        r = r-light;
         r.normalize();
-        float spec = pow(max(r.z, 0.0f), model->specular(bpoint)+100);*/
-     //   float diff = max(0.f, v1.scalaire(v2));
-
-        float diff = max(0.f, n.scalaire(light)); //PROBLEME ICI
-
-        //   cout << n.scalaire(light) <<endl;
+        float spec = pow(max(r.z, 0.0f), model->specular(bpoint)+100);
+        float diff = max(0.f, n.scalaire(light));
         TGAColor c = model->diffuse(bpoint);
         color = c;
         for (int i = 0; i < 3; i++){
-        //    color[i] = min<float>(5 + c[i]*(diff+2*spec), 255);
-            color[i] = c[i] *diff; //1 POUR TESTER
+            color[i] = min<float>(5 + c[i]*(diff+0.6*spec), 255);
         }
-      //  cout << (float)diff << " : " << (int)c[0] << " / " << (int)c[1] << " / " << (int)c[2] << endl;
-
         return true;
     }
 };
