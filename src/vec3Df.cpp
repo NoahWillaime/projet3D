@@ -13,9 +13,9 @@ vec3Df::vec3Df(float Vx, float Vy, float Vz):x(Vx),y(Vy),z(Vz){
 }
 
 void vec3Df::normalize() {
-    x /= norm;
-    y /= norm;
-    z /= norm;
+    x /= getNorm();
+    y /= getNorm();
+    z /= getNorm();
 }
 
 float vec3Df::scalaire(vec3Df v) {

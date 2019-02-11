@@ -51,11 +51,11 @@ void get_viewport(float x, float y, float width, float height){
     vp.set(2, 2, depth/2.f);
 }
 
-void get_perspective(vec3Df eye){
+void get_perspective(vec3Df eye, vec3Df center){
     projection.reset();
     projection.identity();
     if (eye.z != 0)
-        projection.set(2, 3, -1/eye.z);
+        projection.set(2, 3, -1/substractM(eye, center).norm);
     else
         projection.set(2, 3, 0);
 }
@@ -66,8 +66,8 @@ point4Df perspective(point3Df point){
     m1.set(0, 1, point.y);
     m1.set(0, 2, point.z);
     m1.set(0, 3, 1);
-    m1.multiply(projection);
-    m1.reduire();
+    m1 = m1.multiply(projection);
+    //m1.reduire();
     point4Df p = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2), m1.get(0, 3)};
     return p;
 }
@@ -78,7 +78,7 @@ vec3Df viewport(vec3Df point){
     m1.set(0, 1, point.y);
     m1.set(0, 2, point.z);
     m1.set(0, 3, 1);
-    m1.multiply(vp);
+    m1 = m1.multiply(vp);
     vec3Df p = vec3Df(m1.get(0, 0), m1.get(0, 1), m1.get(0, 2));
     return p;
 }
@@ -106,7 +106,7 @@ point3Df view(vec3Df p){
     m1.set(0, 1, p.y);
     m1.set(0, 2, p.z);
     m1.set(0, 3, 1);
-    m1.multiply(lookat);
+    m1 = m1.multiply(lookat);
     point3Df p2 = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2)};
     return p2;
 }

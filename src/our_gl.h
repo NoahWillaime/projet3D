@@ -23,7 +23,7 @@ struct IShader {
 
 
 void get_viewport(float x, float y, float width, float height);
-void get_perspective(vec3Df eye);
+void get_perspective(vec3Df eye, vec3Df center);
 vec3Df viewport(vec3Df point);
 point4Df perspective(point3Df point);
 void setLook(vec3Df eye, vec3Df center, vec3Df up);

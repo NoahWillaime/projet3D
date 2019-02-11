@@ -61,6 +61,7 @@ struct GShader : public IShader{
         texturePts.set(j, 0, model->getTabTexture(index.y).x); //A.x
         texturePts.set(j, 1, model->getTabTexture(index.y).y); //A.y
         point4Df p = perspective(view(model->getTab(index.x)));
+        point4Df p2 = perspective(view(model->getTab(index.x)));
         varying.set(j, 0, p.x);
         varying.set(j, 1, p.y);
         varying.set(j, 2, p.z);
@@ -68,27 +69,37 @@ struct GShader : public IShader{
         norm_tri.set(j, 1, p.y/p.w);
         norm_tri.set(j, 2, p.z/p.w);
         vec3Df vn = model->getNormalVector(index.x);
+        vn.normalize();
         Matrice m = Matrice(1, 4);
         m.set(0,0,vn.x);
         m.set(0,1,vn.y);
         m.set(0,2,vn.z);
         m.set(0,3,0.f);
-        m.multiply(MIT);
+        m = m.multiply(MIT);
         varying_norm.set(j, 0, m.get(0,0));
         varying_norm.set(j, 1, m.get(0,1));
         varying_norm.set(j, 2, m.get(0,2));
-       varying_norm.print();
-    //    MIT.print();
-        std::cout << "==" << std::endl;
+        //VARYING OK !!
         if (j == 2){
-            Matrice mTest = Matrice(1, 3);
-            vec3Df barTest = vec3Df(1,1,1);
-            vec3Df barCor= vec3Df(1,1,1);
-            mTest.setCol(0, barTest);
-            mTest.multiply(varying_norm);
-            vec3Df h = vec3Df(mTest.get(0,0), mTest.get(0,1),mTest.get(0,2));
-            h.normalize();
-          //  std::cout <<h.x << " / " << h.y << " / " <<  h.z<<std::endl;
+            Matrice A = Matrice(3, 3);
+            A.set(0, 0, norm_tri.get(1, 0) - norm_tri.get(0, 0));
+            A.set(1, 0, norm_tri.get(1, 1) - norm_tri.get(0, 1));
+            A.set(2, 0, norm_tri.get(1, 2) - norm_tri.get(0, 2));
+            A.set(0, 1, norm_tri.get(2, 0) - norm_tri.get(0, 0));
+            A.set(1, 1, norm_tri.get(2, 1) - norm_tri.get(0, 1));
+            A.set(2, 1, norm_tri.get(2, 2) - norm_tri.get(0, 2));
+            vec3Df bn;
+            vec3Df barCor(1,1,1);
+            bn.x = varying_norm.get(0,0) * barCor.x + varying_norm.get(1, 0) * barCor.y + varying_norm.get(2, 0) * barCor.z;
+            bn.y = varying_norm.get(0,1) * barCor.x + varying_norm.get(1, 1) * barCor.y + varying_norm.get(2, 1) * barCor.z;
+            bn.z = varying_norm.get(0,2) * barCor.x + varying_norm.get(1, 2) * barCor.y + varying_norm.get(2, 2) * barCor.z;
+
+           // bn.normalize();
+            cout << bn.x << "/"<<bn.y<<"/"<<bn.z<<endl;
+            A.setRow(2, bn);
+//            A.print();
+            //cout << norm_tri.get(0, 1) - norm_tri.get(0, 0) << endl;
+            cout << "===" <<endl;
         }
         return vec3Df(p.x, p.y,p.z);
     }
@@ -116,10 +127,10 @@ struct GShader : public IShader{
 
         Matrice mi = Matrice(1, 3);
         mi.setCol(0, ti);
-        mi.multiply(AI);
+        mi = mi.multiply(AI);
         Matrice mj = Matrice(1, 3);
         mj.setCol(0, tj);
-        mj.multiply(AI);
+        mj = mj.multiply(AI);
         vec3Df i = vec3Df(mi.get(0,0), mi.get(0, 1), mi.get(0, 2));
         vec3Df j = vec3Df(mj.get(0,0), mj.get(0, 1), mj.get(0, 2));
         mi.delMatrice();
@@ -136,10 +147,8 @@ struct GShader : public IShader{
         vec3Df test = model->getNormalTexture(bpoint.x, bpoint.y);
         Matrice t = Matrice(1, 3);
         t.setCol(0, test);
-        t.multiply(B);
-        vec3Df n2 = vec3Df(B.get(0, 0) * test.x + B.get(1, 0) * test.y + B.get(2, 0) * test.z, B.get(0, 1) * test.x + B.get(1, 1) * test.y + B.get(2, 1) * test.z, B.get(0, 2) * test.x + B.get(1, 2) * test.y + B.get(2, 2) * test.z);
+        t = t.multiply(B);
         vec3Df n = vec3Df(t.get(0, 0), t.get(0, 1), t.get(0, 2));
-        n2.normalize();
         n.normalize();
         /*
         Matrice m = Matrice(1, 4);
@@ -175,7 +184,7 @@ struct GShader : public IShader{
         float spec = pow(max(r.z, 0.0f), model->specular(bpoint)+100);*/
      //   float diff = max(0.f, v1.scalaire(v2));
 
-        float diff = max(0.f, n2.scalaire(light)); //PROBLEME ICI
+        float diff = max(0.f, n.scalaire(light)); //PROBLEME ICI
 
         //   cout << n.scalaire(light) <<endl;
         TGAColor c = model->diffuse(bpoint);
@@ -209,7 +218,7 @@ void drawFace(){
     //Shadow
     setLook(light, center, up);
     get_viewport(size/8, size/8, size*3/4, size*3/4);
-    get_perspective(vec3Df());
+    get_perspective(vec3Df(), vec3Df());
     for (int i = 0; i < model->getNbLine(); i+=3){
         for (int j = 0; j < 3; j++){
             coord[j] = depthShader.vertex(i, j);
@@ -222,7 +231,7 @@ void drawFace(){
     //Frame
     setLook(eye, center, up);
     get_viewport(size/8, size/8, size*3/4, size*3/4);
-    get_perspective(eye);
+    get_perspective(eye, center);
     shader.M = lookat.multiplyCarre(projection);
     shader.MIT = shader.M.transpose().inverse();
     shader.MIT.set(3, 0, -0);
@@ -234,7 +243,7 @@ void drawFace(){
     l.set(0, 1, light.y);
     l.set(0, 2, light.z);
     l.set(0, 3, 1);
-    l.multiply(shader.M);
+    l = l.multiply(shader.M);
     light = vec3Df(l.get(0, 0), l.get(0, 1), l.get(0, 2));
     light.normalize();
     for (int i = 0; i < model->getNbLine(); i+=3){
@@ -248,13 +257,11 @@ void drawFace(){
     delete[] zbuffer;
 }
 
-int main(int argc, char **argv){
-    if (argc < 2){
+int main(int argc, char **argv) {
+    if (argc < 2) {
         cerr << "./projet3D [Model Name]" << endl;
         return -1;
     }
     model = new Model(argv[1]);
     drawFace();
-
-
 }

@@ -18,7 +18,7 @@ public:
     void delMatrice();
     void reset();
     Matrice multiplyCarre(Matrice mat);
-    void multiply(Matrice mat);
+    Matrice multiply(Matrice mat);
     void identity();
     void reduire();
     void setRow(int row, vec3Df v);

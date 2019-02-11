@@ -46,7 +46,8 @@ void Matrice::set(int x, int y, float p) {
     }
 }
 
-void Matrice::multiply(Matrice mat) {
+Matrice Matrice::multiply(Matrice mat) {
+    Matrice m = Matrice(width, height);
     if (height == mat.get_width()){
         float result;
         for (int i = 0; i < mat.get_height(); i++){
@@ -54,10 +55,12 @@ void Matrice::multiply(Matrice mat) {
             for (int j = 0; j < mat.get_width(); j++){
                 result += matrix[j][0] * mat.get(j, i);
             }
-            matrix[i][0] = result;
+            m.set(0,i,result);
         }
     }
+    return m;
 }
+
 Matrice Matrice::multiplyCarre(Matrice mat) {
     Matrice res(width, width);
     float sum;
