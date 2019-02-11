@@ -39,6 +39,10 @@ float vec3Df::operator*(const vec3Df v) {
     return res;
 }
 
+float vec3Df::getNorm() {
+    return sqrtf(x*x+y*y+z*z);
+}
+
 float vec3Df::operator[](const int i) {
     if (i == 0)
         return x;

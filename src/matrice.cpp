@@ -58,7 +58,6 @@ void Matrice::multiply(Matrice mat) {
         }
     }
 }
-
 Matrice Matrice::multiplyCarre(Matrice mat) {
     Matrice res(width, width);
     float sum;

@@ -53,6 +53,7 @@ public:
     float norm;
     vec3Df();
     vec3Df(float x1, float y1, float z1);
+    float getNorm();
     void normalize();
     float operator[](const int i);
     vec3Df operator-(const vec3Df v);
