@@ -17,9 +17,9 @@ Model *model = NULL;
 int *shadowbuffer = new int[size * size];
 int *zbuffer = new int[size * size];
 
-vec3Df eye = vec3Df(1, 1, 3);
+vec3Df eye = vec3Df(0, 0, 3);
 vec3Df up = vec3Df(0, 1, 0);
-vec3Df light = vec3Df(1,1, 1);
+vec3Df light = vec3Df(0,0, 3);
 vec3Df center = vec3Df(0, 0, 0);
 
 struct DepthShader : public IShader{
@@ -121,12 +121,12 @@ struct GShader : public IShader{
         vec3Df r = n.mult(n.scalaire(light) * 2.f);
         r = r-light;
         r.normalize();
-        float spec = pow(max(r.z, 0.0f), model->specular(bpoint));
+        float spec = pow(max(r.z, 0.0f), model->specular(bpoint)+100);
         float diff = max(0.f, n.scalaire(light));
         TGAColor c = model->diffuse(bpoint);
         color = c;
         for (int i = 0; i < 3; i++){
-            color[i] = min<float>(5 + c[i]*(diff+0.6*spec), 255);
+            color[i] = min<float>(5 + c[i]*(diff+.6*spec), 255);
         }
         return true;
     }
@@ -191,7 +191,7 @@ int main(int argc, char **argv) {
     TGAImage depthI(size, size, TGAImage::RGB);
     model = new Model(argv[1]);
     drawFace(image, depthI);
-    if (argv[1][0] = 'h') { //si modele = head
+    if (argv[1][0] == 'h') { //si modele = head
         model = new Model("head_eye");
         drawFace(image, depthI);
     }

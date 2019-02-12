@@ -106,7 +106,16 @@ point3Df view(vec3Df p){
     m1.set(0, 1, p.y);
     m1.set(0, 2, p.z);
     m1.set(0, 3, 1);
+    Matrice rotation = Matrice(4,4);
+    rotation.identity();
+    rotation.set(0,0,cos(1));
+    rotation.set(0,2,sin(1));
+    rotation.set(2,0,-sin(1));
+    rotation.set(2,2,cos(1));
+    m1 = m1.multiply(rotation);
+
     m1 = m1.multiply(lookat);
+
     point3Df p2 = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2)};
     return p2;
 }
