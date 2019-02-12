@@ -19,6 +19,7 @@ public:
     void reset();
     Matrice multiplyCarre(Matrice mat);
     Matrice multiply(Matrice mat);
+    vec3Df baricord(vec3Df barCor);
     void identity();
     void reduire();
     void setRow(int row, vec3Df v);

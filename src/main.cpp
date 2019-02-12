@@ -19,6 +19,7 @@ int *zbuffer = new int[size * size];
 
 vec3Df eye = vec3Df(0, 0, 3);
 vec3Df up = vec3Df(0, 1, 0);
+vec3Df light_dir = vec3Df(0,0,3);
 vec3Df light = vec3Df(0,0, 3);
 vec3Df center = vec3Df(0, 0, 0);
 
@@ -36,7 +37,7 @@ struct DepthShader : public IShader{
         return vpT;
     }
 
-    virtual bool fragment(point3Df barCor, TGAColor &color){
+    virtual bool fragment(vec3Df barCor, TGAColor &color){
         vec3Df p;
         p.x = varying.get(0, 0)  * barCor.x + varying.get(1, 0) * barCor.y + varying.get(2, 0) * barCor.z;
         p.y = varying.get(0, 1)  * barCor.x + varying.get(1, 1) * barCor.y + varying.get(2, 1) * barCor.z;
@@ -76,7 +77,18 @@ struct GShader : public IShader{
         return vec3Df(p.x/p.w, p.y/p.w,p.z/p.w);
     }
 
-    virtual bool fragment(point3Df barCor, TGAColor &color){
+    virtual bool fragment(vec3Df barCor, TGAColor &color){
+        vec3Df shad_vec = norm_tri.baricord(barCor);
+        shad_vec.x = varying_norm.get(0,0) * barCor.x + varying_norm.get(1, 0) * barCor.y + varying_norm.get(2, 0) * barCor.z;
+        shad_vec.y = varying_norm.get(0,1) * barCor.x + varying_norm.get(1, 1) * barCor.y + varying_norm.get(2, 1) * barCor.z;
+        shad_vec.z = varying_norm.get(0,2) * barCor.x + varying_norm.get(1, 2) * barCor.y + varying_norm.get(2, 2) * barCor.z;
+        Matrice shad_m = Matrice(1,4);
+        shad_m.setCol(0, shad_vec);
+        shad_m.set(0,3,1);
+        shad_m = shad_m.multiply(M_Shadow);
+        shad_vec = vec3Df(shad_m.get(0,0)/shad_m.get(0,3), shad_m.get(0,1)/shad_m.get(0,3),shad_m.get(0,2)/shad_m.get(0,3));
+        int index = int(shad_vec.x) + int(shad_vec.y)*size;
+        float shadow = .3 + .7*((index > 0) ? (shadowbuffer[index]<shad_vec.z) : (0));
         Matrice A = Matrice(3, 3);
         A.set(0, 0, norm_tri.get(1, 0) - norm_tri.get(0, 0));
         A.set(1, 0, norm_tri.get(1, 1) - norm_tri.get(0, 1));
@@ -84,10 +96,7 @@ struct GShader : public IShader{
         A.set(0, 1, norm_tri.get(2, 0) - norm_tri.get(0, 0));
         A.set(1, 1, norm_tri.get(2, 1) - norm_tri.get(0, 1));
         A.set(2, 1, norm_tri.get(2, 2) - norm_tri.get(0, 2));
-        vec3Df bn;
-        bn.x = varying_norm.get(0,0) * barCor.x + varying_norm.get(1, 0) * barCor.y + varying_norm.get(2, 0) * barCor.z;
-        bn.y = varying_norm.get(0,1) * barCor.x + varying_norm.get(1, 1) * barCor.y + varying_norm.get(2, 1) * barCor.z;
-        bn.z = varying_norm.get(0,2) * barCor.x + varying_norm.get(1, 2) * barCor.y + varying_norm.get(2, 2) * barCor.z;
+        vec3Df bn = varying_norm.baricord(barCor);
         bn.normalize();
         A.setRow(2, bn);
         Matrice AI = A.inverse3();
@@ -156,14 +165,12 @@ void drawFace(TGAImage &image, TGAImage &depthI){
     get_perspective(eye, center);
     shader.M = lookat.multiplyCarre(projection);
     shader.MIT = shader.M.transpose().inverse();
-    shader.MIT.set(3, 0, -0);
-    shader.MIT.set(3, 1, 0);
     shader.M_Shadow = shader.M.multiplyCarre(vp.multiplyCarre(lookat.multiplyCarre(projection)).inverse());
 
     Matrice l = Matrice(1, 4);
-    l.set(0, 0, light.x);
-    l.set(0, 1, light.y);
-    l.set(0, 2, light.z);
+    l.set(0, 0, light_dir.x);
+    l.set(0, 1, light_dir.y);
+    l.set(0, 2, light_dir.z);
     l.set(0, 3, 1);
     l = l.multiply(shader.M);
     light = vec3Df(l.get(0, 0), l.get(0, 1), l.get(0, 2));
@@ -192,7 +199,8 @@ int main(int argc, char **argv) {
     model = new Model(argv[1]);
     drawFace(image, depthI);
     if (argv[1][0] == 'h') { //si modele = head
-        model = new Model("head_eye");
+        std::string s = "head_eye";
+        model = new Model(s.c_str());
         drawFace(image, depthI);
     }
     image.flip_vertically();

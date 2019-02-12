@@ -6,21 +6,18 @@
 
 using namespace std;
 
-Model::Model(char *fn) : filename(fn){
+Model::Model(const char *fn) : filename(fn){
     std::stringstream ss, ss2, ss3;
     ss << "../obj/" << filename << "_diffuse.tga";
     ss2 << "../obj/" << filename << "_nm_tangent.tga";
     ss3 << "../obj/" << filename << "_spec.tga";
     std::string s = ss.str();
-    cout << s << endl;
     texture.read_tga_file(s.c_str());
     texture.flip_vertically();    readfile();
     s = ss2.str();
-    cout << s << endl;
     textureNormal.read_tga_file(s.c_str());
     textureNormal.flip_vertically();
     s = ss3.str();
-    cout << s << endl;
     textureSpec.read_tga_file(s.c_str());
     textureSpec.flip_vertically();
     readfile();

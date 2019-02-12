@@ -18,7 +18,7 @@ extern Matrice projection;
 struct IShader {
     //virtual ~IShader();
     virtual vec3Df vertex(int i, int j) = 0;
-    virtual bool fragment(point3Df barCor, TGAColor &color) = 0;
+    virtual bool fragment(vec3Df barCor, TGAColor &color) = 0;
 };
 
 

@@ -200,6 +200,14 @@ vec3Df Matrice::getCol3Df(int col) {
     return vec3Df(matrix[0][col], matrix[1][col], matrix[2][col]);
 }
 
+vec3Df Matrice::baricord(vec3Df barCor) {
+    vec3Df bn;
+    bn.x = matrix[0][0] * barCor.x + matrix[0][1] * barCor.y + matrix[0][2] * barCor.z;
+    bn.y = matrix[1][0] * barCor.x + matrix[1][1] * barCor.y + matrix[1][2] * barCor.z;
+    bn.z = matrix[2][0] * barCor.x + matrix[2][1] * barCor.y + matrix[2][2]* barCor.z;
+    return bn;
+}
+
 void Matrice::print() {
     for (int i = 0; i < height; i++) {
         for (int j = 0; j < width; j++)

@@ -106,16 +106,14 @@ point3Df view(vec3Df p){
     m1.set(0, 1, p.y);
     m1.set(0, 2, p.z);
     m1.set(0, 3, 1);
+    m1 = m1.multiply(lookat);
     Matrice rotation = Matrice(4,4);
     rotation.identity();
-    rotation.set(0,0,cos(1));
-    rotation.set(0,2,sin(1));
-    rotation.set(2,0,-sin(1));
-    rotation.set(2,2,cos(1));
-    m1 = m1.multiply(rotation);
-
-    m1 = m1.multiply(lookat);
-
+    rotation.set(0,0,cos(1.5));
+    rotation.set(0,2,sin(1.5));
+    rotation.set(2,0,-sin(1.5));
+    rotation.set(2,2,cos(1.5));
+ //   m1 = m1.multiply(rotation);
     point3Df p2 = {m1.get(0, 0), m1.get(0, 1), m1.get(0, 2)};
     return p2;
 }
@@ -149,12 +147,12 @@ std::vector<point2Df> boundingBox(vec3Df A, vec3Df B, vec3Df C) {
     return boundingBox;
 }
 
-point3Df barycentric(point2Df p, vec3Df A, vec3Df B, vec3Df C){
+vec3Df barycentric(point2Df p, vec3Df A, vec3Df B, vec3Df C){
     float div = A.x*B.y + B.x*C.y + C.x*A.y - A.y*B.x - B.y*C.x - C.y*A.x;
     float p1 = (p.x*B.y + B.x*C.y + C.x*p.y - p.y*B.x - B.y*C.x - C.y*p.x) / div;
     float p2 = (A.x*p.y + p.x*C.y + C.x*A.y - A.y*p.x - p.y*C.x - C.y*A.x) / div;
     float p3 = (A.x*B.y + B.x*p.y + p.x*A.y - A.y*B.x - B.y*p.x - p.y*A.x) / div;
-    point3Df b = {p1, p2, p3};
+    vec3Df b = vec3Df(p1, p2, p3);
     return b;
 }
 
@@ -165,7 +163,7 @@ void drawTriangle(vec3Df *coords, TGAImage &image, int *zbuffer, IShader &shader
     for (float x = bBox[0].x; x <= bBox[1].x; x++){
         for (float y = bBox[0].y; y <= bBox[1].y; y++){
             point2Df p = {x, y};
-            point3Df b = barycentric(p, coords[0], coords[1], coords[2]);
+            vec3Df b = barycentric(p, coords[0], coords[1], coords[2]);
             if (b.x < 0 || b.y < 0 || b.z < 0){
                 continue;
             } else {
