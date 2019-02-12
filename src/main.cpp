@@ -15,8 +15,9 @@ const int depth = 255;
 
 Model *model = NULL;
 int *shadowbuffer = new int[size * size];
+int *zbuffer = new int[size * size];
 
-vec3Df eye = vec3Df(0, 0, 3);
+vec3Df eye = vec3Df(1, 1, 3);
 vec3Df up = vec3Df(0, 1, 0);
 vec3Df light = vec3Df(1,1, 1);
 vec3Df center = vec3Df(0, 0, 0);
@@ -120,7 +121,7 @@ struct GShader : public IShader{
         vec3Df r = n.mult(n.scalaire(light) * 2.f);
         r = r-light;
         r.normalize();
-        float spec = pow(max(r.z, 0.0f), model->specular(bpoint)+100);
+        float spec = pow(max(r.z, 0.0f), model->specular(bpoint));
         float diff = max(0.f, n.scalaire(light));
         TGAColor c = model->diffuse(bpoint);
         color = c;
@@ -131,22 +132,11 @@ struct GShader : public IShader{
     }
 };
 
-void drawFace(){
-    TGAImage image(size, size, TGAImage::RGB);
-    TGAImage depthI(size, size, TGAImage::RGB);
+void drawFace(TGAImage &image, TGAImage &depthI){
    // light.normalize();
     GShader shader;
     DepthShader depthShader;
-    int *zbuffer = new int[size * size];
     vec3Df coord[3];
-
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            zbuffer[i + j * size] = numeric_limits<int>::min();
-            shadowbuffer[i + j * size] = numeric_limits<int>::min();
-        }
-    }
-
     //Shadow
     setLook(light, center, up);
     get_viewport(size/8, size/8, size*3/4, size*3/4);
@@ -184,9 +174,6 @@ void drawFace(){
         }
         drawTriangle(coord, image, zbuffer, shader);
     }
-    image.flip_vertically();
-    image.write_tga_file("output.tga");
-    delete[] zbuffer;
 }
 
 int main(int argc, char **argv) {
@@ -194,6 +181,21 @@ int main(int argc, char **argv) {
         cerr << "./projet3D [Model Name]" << endl;
         return -1;
     }
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            zbuffer[i + j * size] = numeric_limits<int>::min();
+            shadowbuffer[i + j * size] = numeric_limits<int>::min();
+        }
+    }
+    TGAImage image(size, size, TGAImage::RGB);
+    TGAImage depthI(size, size, TGAImage::RGB);
     model = new Model(argv[1]);
-    drawFace();
+    drawFace(image, depthI);
+    if (argv[1][0] = 'h') { //si modele = head
+        model = new Model("head_eye");
+        drawFace(image, depthI);
+    }
+    image.flip_vertically();
+    image.write_tga_file("output.tga");
+    delete[] zbuffer;
 }
