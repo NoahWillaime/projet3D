@@ -75,9 +75,8 @@ void Model::readNormal() {
     std::stringstream ss;
     ss << "../obj/" << filename << ".obj";
     std::string s = ss.str();
-    ifstream fichier(s, ios::in);    string line;
-    vector<string> line_parts;
-    string part;
+    ifstream fichier(s, ios::in);
+    string line;
     float x,y,z;
     if (fichier){
         while (getline(fichier, line)){
@@ -100,8 +99,6 @@ void Model::readTexture() {
     std::string s = ss.str();
     ifstream fichier(s, ios::in);
     string line;
-    vector<string> line_parts;
-    string part;
     float x,y;
     if (fichier) {
         while (getline(fichier, line)) {
@@ -127,8 +124,6 @@ void Model::readfile(){
     ifstream fichier(s, ios::in);
     string line;
     float x, y, z;
-    vector<string> line_parts;
-    string part;
 
     if (fichier) {
         while (getline(fichier, line)) {
