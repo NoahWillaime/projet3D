@@ -19,7 +19,7 @@ int *zbuffer = new int[size * size];
 
 vec3Df eye = vec3Df(0, 0, 3);
 vec3Df up = vec3Df(0, 1, 0);
-vec3Df light_dir = vec3Df(0,0,3);
+vec3Df light_dir = vec3Df(1,1,1);
 vec3Df light = vec3Df(0,0, 3);
 vec3Df center = vec3Df(0, 0, 0);
 
@@ -78,17 +78,6 @@ struct GShader : public IShader{
     }
 
     virtual bool fragment(vec3Df barCor, TGAColor &color){
-        vec3Df shad_vec = norm_tri.baricord(barCor);
-        shad_vec.x = varying_norm.get(0,0) * barCor.x + varying_norm.get(1, 0) * barCor.y + varying_norm.get(2, 0) * barCor.z;
-        shad_vec.y = varying_norm.get(0,1) * barCor.x + varying_norm.get(1, 1) * barCor.y + varying_norm.get(2, 1) * barCor.z;
-        shad_vec.z = varying_norm.get(0,2) * barCor.x + varying_norm.get(1, 2) * barCor.y + varying_norm.get(2, 2) * barCor.z;
-        Matrice shad_m = Matrice(1,4);
-        shad_m.setCol(0, shad_vec);
-        shad_m.set(0,3,1);
-        shad_m = shad_m.multiply(M_Shadow);
-        shad_vec = vec3Df(shad_m.get(0,0)/shad_m.get(0,3), shad_m.get(0,1)/shad_m.get(0,3),shad_m.get(0,2)/shad_m.get(0,3));
-        int index = int(shad_vec.x) + int(shad_vec.y)*size;
-        float shadow = .3 + .7*((index > 0) ? (shadowbuffer[index]<shad_vec.z) : (0));
         Matrice A = Matrice(3, 3);
         A.set(0, 0, norm_tri.get(1, 0) - norm_tri.get(0, 0));
         A.set(1, 0, norm_tri.get(1, 1) - norm_tri.get(0, 1));
@@ -130,12 +119,13 @@ struct GShader : public IShader{
         vec3Df r = n.mult(n.scalaire(light) * 2.f);
         r = r-light;
         r.normalize();
-        float spec = pow(max(r.z, 0.0f), model->specular(bpoint)+100);
+        float spec = pow(max(r.z, 0.0f), model->specular(bpoint)+10);
         float diff = max(0.f, n.scalaire(light));
         TGAColor c = model->diffuse(bpoint);
+        TGAColor cGlow = model->glowText(bpoint);
         color = c;
         for (int i = 0; i < 3; i++){
-            color[i] = min<float>(5 + c[i]*(diff+.6*spec), 255);
+            color[i] = min<float>(5 + c[i]*(diff+1.2*spec+0.15*cGlow[i]), 255);
         }
         return true;
     }
@@ -156,8 +146,6 @@ void drawFace(TGAImage &image, TGAImage &depthI){
         }
         drawTriangle(coord, depthI, shadowbuffer, depthShader);
     }
-    depthI.flip_vertically();
-    depthI.write_tga_file("depth.tga");
 
     //Frame
     setLook(eye, center, up);
@@ -202,8 +190,17 @@ int main(int argc, char **argv) {
         std::string s = "head_eye";
         model = new Model(s.c_str());
         drawFace(image, depthI);
+    } else if (argv[1][0] == 'b') { //si modele == boogie
+        std::string s = "boogie_head";
+        model = new Model(s.c_str());
+        drawFace(image, depthI);
+        s = "boogie_eyes";
+        model = new Model(s.c_str());
+        drawFace(image, depthI);
     }
     image.flip_vertically();
     image.write_tga_file("output.tga");
+    depthI.flip_vertically();
+    depthI.write_tga_file("depth.tga");
     delete[] zbuffer;
 }

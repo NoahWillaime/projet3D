@@ -21,6 +21,7 @@ private:
     TGAImage texture;
     TGAImage textureNormal;
     TGAImage textureSpec;
+    TGAImage textureGlow;
     const char *filename;
     std::vector<vec3Df> tab;
     std::vector<point2D> line;
@@ -30,6 +31,7 @@ private:
     void readfile();
     void readTexture();
     void readNormal();
+    bool glow;
 public:
     Model();
     Model(const char *filename);
@@ -39,6 +41,7 @@ public:
     point3Df getTabTexture(int i);
     vec3Df getNormalVector(int i);
     int getNbLine();
+    TGAColor glowText(point2Df textureCord);
     TGAColor diffuse(point2Df textureCord);
     float specular(point2Df specCord);
 };

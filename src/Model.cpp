@@ -6,14 +6,21 @@
 
 using namespace std;
 
-Model::Model(const char *fn) : filename(fn){
-    std::stringstream ss, ss2, ss3;
+Model::Model(const char *fn) : filename(fn), glow(false){
+    std::stringstream ss, ss2, ss3, ss4;
     ss << "../obj/" << filename << "_diffuse.tga";
     ss2 << "../obj/" << filename << "_nm_tangent.tga";
     ss3 << "../obj/" << filename << "_spec.tga";
+    if (fn[0] == 'd') {
+        ss4 << "../obj/" << filename << "_glow.tga";
+        glow = true;
+        std::string s = ss4.str();
+        textureGlow.read_tga_file(s.c_str());
+        textureGlow.flip_vertically();
+    }
     std::string s = ss.str();
     texture.read_tga_file(s.c_str());
-    texture.flip_vertically();    readfile();
+    texture.flip_vertically();
     s = ss2.str();
     textureNormal.read_tga_file(s.c_str());
     textureNormal.flip_vertically();
@@ -28,6 +35,13 @@ Model::Model(const char *fn) : filename(fn){
 
 float Model::specular(point2Df specCord) {
     return textureSpec.get(specCord.x*textureSpec.get_width(), specCord.y*textureSpec.get_width())[0]/1.f;
+}
+
+TGAColor Model::glowText(point2Df textureCord) {
+    TGAColor color = TGAColor(0,0,0);
+    if (glow)
+        color = textureGlow.get(textureCord.x*textureGlow.get_width(), textureCord.y * textureGlow.get_width());
+    return color;
 }
 
 TGAColor Model::diffuse(point2Df textureCord) {
@@ -67,17 +81,12 @@ void Model::readNormal() {
     float x,y,z;
     if (fichier){
         while (getline(fichier, line)){
-            if (line[0] == 'v' && line[1] == 'n' && line[2] == ' '){
-                istringstream iss(line);
-                while(getline(iss, part, ' ')){
-                    line_parts.push_back(part);
-                }
-                x = strtof((line_parts[2]).c_str(), 0);
-                y = strtof((line_parts[3]).c_str(), 0);
-                z = strtof((line_parts[4]).c_str(), 0);
-                this->normalVector.push_back(vec3Df(x, y, z));
+            stringstream test(line);
+            string option;
+            test >> option >> x >> y >> z;
+            if (option == "vn") {
+                normalVector.push_back(vec3Df(x, y, z));
             }
-            line_parts.clear();
         }
         fichier.close();
     } else {
@@ -93,21 +102,16 @@ void Model::readTexture() {
     string line;
     vector<string> line_parts;
     string part;
-
+    float x,y;
     if (fichier) {
         while (getline(fichier, line)) {
-            if (line[0] == 'v' && line[1] == 't' && line[2] == ' ') {
-                istringstream iss(line);
-                while (getline(iss, part, ' ')) {
-                    line_parts.push_back(part);
-                }
-                float x = strtof((line_parts[2]).c_str(), 0);
-                float y = strtof((line_parts[3]).c_str(), 0);
-                float z = strtof((line_parts[4]).c_str(), 0);
-                point3Df p = {x, y, z};
+            stringstream test(line);
+            string option;
+            test >> option >> x >> y;
+            if (option == "vt") {
+                point3Df p = {x, y, 0};
                 this->tabTexture.push_back(p);
             }
-            line_parts.clear();
         }
         fichier.close();
     } else {
@@ -128,17 +132,12 @@ void Model::readfile(){
 
     if (fichier) {
         while (getline(fichier, line)) {
-            if (line[0] == 'v' && line[1] == ' ') {
-                istringstream iss(line);
-                while (getline(iss, part, ' ')) {
-                    line_parts.push_back(part);
-                }
-                x = strtof((line_parts[1]).c_str(), 0);
-                y = strtof((line_parts[2]).c_str(), 0);
-                z = strtof((line_parts[3]).c_str(), 0);
+            stringstream test(line);
+            string option;
+            test >> option >> x >> y >> z;
+            if (option == "v") {
                 tab.push_back(vec3Df(x, y, z));
             }
-            line_parts.clear();
         }
         fichier.close();
     } else {

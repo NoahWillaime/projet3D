@@ -25,6 +25,15 @@ struct point3Df{
 
     point3Df(float cx, float cy, float cz) : x(cx), y(cy), z(cz){}
 
+    float& operator[](const int index){
+        if (index == 0)
+            return x;
+        else if (index == 1)
+            return y;
+        else if (index == 2)
+            return z;
+    }
+
     point3Df operator/(const float d){
         x/=d;
         y/=d;
