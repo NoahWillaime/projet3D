@@ -17,11 +17,14 @@ Model *model = NULL;
 int *shadowbuffer = new int[size * size];
 int *zbuffer = new int[size * size];
 
-vec3Df eye = vec3Df(0, 0, 3);
+vec3Df eye = vec3Df(1, 0, 3);
 vec3Df up = vec3Df(0, 1, 0);
 vec3Df light_dir = vec3Df(1,1,1);
-vec3Df light = vec3Df(0,0, 3);
 vec3Df center = vec3Df(0, 0, 0);
+
+
+//Pour fragment
+vec3Df light;
 
 struct DepthShader : public IShader{
     Matrice varying = Matrice(3, 3);
@@ -182,25 +185,39 @@ int main(int argc, char **argv) {
             shadowbuffer[i + j * size] = numeric_limits<int>::min();
         }
     }
+    TGAColor background(236,240,241);
     TGAImage image(size, size, TGAImage::RGB);
     TGAImage depthI(size, size, TGAImage::RGB);
+    for (int i = 0; i < size; i++){
+        for (int j = 0; j < size; j++){
+            image.set(i,j,background);
+        }
+    }
     model = new Model(argv[1]);
     drawFace(image, depthI);
+    std::string s;
     if (argv[1][0] == 'h') { //si modele = head
-        std::string s = "head_eye";
+        s = "head_eye";
         model = new Model(s.c_str());
         drawFace(image, depthI);
     } else if (argv[1][0] == 'b') { //si modele == boogie
-        std::string s = "boogie_head";
+        s = "boogie_head";
         model = new Model(s.c_str());
         drawFace(image, depthI);
         s = "boogie_eyes";
         model = new Model(s.c_str());
         drawFace(image, depthI);
     }
+    std::stringstream ss;
+    ss << argv[1] << "_output.tga";
+    std::string outputname = ss.str();
     image.flip_vertically();
-    image.write_tga_file("output.tga");
+    image.write_tga_file(outputname.c_str());
+
+    std::stringstream ss2;
+    ss2 << argv[1] << "_depth.tga";
+    std::string depthname = ss2.str();
     depthI.flip_vertically();
-    depthI.write_tga_file("depth.tga");
+    depthI.write_tga_file(depthname.c_str());
     delete[] zbuffer;
 }
