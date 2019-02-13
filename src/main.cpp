@@ -140,7 +140,7 @@ void drawFace(TGAImage &image, TGAImage &depthI){
     DepthShader depthShader;
     vec3Df coord[3];
     //Shadow
-    setLook(light, center, up);
+    setLook(light_dir, center, up);
     get_viewport(size/8, size/8, size*3/4, size*3/4);
     get_perspective(vec3Df(), vec3Df());
     for (int i = 0; i < model->getNbLine(); i+=3){
